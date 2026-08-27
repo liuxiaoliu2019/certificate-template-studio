@@ -5,6 +5,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$env:PYTHONUTF8 = '1'
+$env:PYTHONDONTWRITEBYTECODE = '1'
 $sourceRoot = [System.IO.Path]::GetFullPath($PSScriptRoot)
 $destinationRoot = [System.IO.Path]::GetFullPath($Destination)
 

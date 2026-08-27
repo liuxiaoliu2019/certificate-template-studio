@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export PYTHONUTF8=1
+export PYTHONDONTWRITEBYTECODE=1
 
 source_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 destination="${HOME}/.codex/skills/certificate-template-studio"
