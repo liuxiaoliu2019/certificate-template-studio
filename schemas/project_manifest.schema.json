@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/project_manifest.schema.json",
+  "title": "Certificate Project Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "textbook_key",
+    "created_at",
+    "updated_at",
+    "source_cover",
+    "style_dna_path",
+    "current_title",
+    "workflow",
+    "controls",
+    "landscape",
+    "portrait",
+    "master",
+    "derivatives",
+    "approvals",
+    "revision_log_path"
+  ],
+  "properties": {
+    "schema_version": { "enum": ["1.0", "1.1", "1.2", "1.3"] },
+    "selected_mode": { "const": "textbook_cover" },
+    "project_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "textbook_key": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "source_cover": { "type": "string", "minLength": 1 },
+    "style_dna_path": { "type": "string", "minLength": 1 },
+    "character_identity_path": { "type": "string", "minLength": 1 },
+    "character_reference_dir": { "type": "string", "minLength": 1 },
+    "current_title": { "type": ["string", "null"] },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage"],
+      "properties": {
+        "stage": {
+          "enum": [
+            "initialized",
+            "analyzing",
+            "awaiting_title",
+            "exploring_landscape",
+            "revising_landscape",
+            "awaiting_landscape_approval",
+            "landscape_approved",
+            "generating_portrait",
+            "awaiting_portrait_approval",
+            "complete",
+            "deriving_title",
+            "style_analyzed",
+            "characters_analyzed",
+            "waiting_for_title",
+            "title_confirmed",
+            "styles_recommended",
+            "landscape_generated",
+            "landscape_selected",
+            "landscape_revising",
+            "portrait_generated",
+            "portrait_revising",
+            "portrait_approved"
+          ]
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landscape", "portrait", "mode", "zone_strengths"],
+      "properties": {
+        "landscape": { "type": "string", "minLength": 1 },
+        "portrait": { "type": "string", "minLength": 1 },
+        "mode": { "const": "soft" },
+        "zone_strengths": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["Z80", "Z50", "Z20", "Z12", "Z08"],
+          "properties": {
+            "Z80": { "const": 80 },
+            "Z50": { "const": 50 },
+            "Z20": { "const": 20 },
+            "Z12": { "const": 12 },
+            "Z08": { "const": 8 }
+          }
+        }
+      }
+    },
+    "landscape": { "$ref": "#/$defs/orientationState" },
+    "portrait": { "$ref": "#/$defs/orientationState" },
+    "style_engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "recommendation_path", "candidate_profiles", "selected_profile", "approved_profile", "master_profile_path", "style_lock"],
+      "properties": {
+        "status": { "enum": ["not_started", "waiting_for_title", "ready", "recommended", "selected", "approved", "stale"] },
+        "recommendation_path": { "type": ["string", "null"] },
+        "candidate_profiles": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "selected_profile": { "type": ["string", "null"] },
+        "approved_profile": { "type": ["string", "null"] },
+        "master_profile_path": { "type": ["string", "null"] },
+        "style_lock": { "enum": ["unlocked", "family_locked", "profile_locked"] }
+      }
+    },
+    "master": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landscape", "portrait", "title"],
+      "properties": {
+        "landscape": { "type": ["string", "null"] },
+        "portrait": { "type": ["string", "null"] },
+        "title": { "type": ["string", "null"] },
+        "style_profile": { "type": ["string", "null"] }
+      }
+    },
+    "derivatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "slug", "source_master", "landscape", "portrait", "created_at"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "slug": { "type": "string", "minLength": 1 },
+          "source_master": { "type": "string", "minLength": 1 },
+          "landscape": { "type": ["string", "null"] },
+          "portrait": { "type": ["string", "null"] },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["orientation", "artifact", "user_confirmation", "approved_at"],
+        "properties": {
+          "orientation": { "enum": ["landscape", "portrait"] },
+          "artifact": { "type": "string", "minLength": 1 },
+          "user_confirmation": { "type": "string", "minLength": 1 },
+          "approved_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "revision_log_path": { "type": "string", "minLength": 1 }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "schema_version": { "enum": ["1.2", "1.3"] } } },
+      "then": { "required": ["character_identity_path", "character_reference_dir", "style_engine"] }
+    },
+    {
+      "if": { "properties": { "schema_version": { "const": "1.3" } } },
+      "then": { "required": ["selected_mode"] }
+    }
+  ],
+  "$defs": {
+    "orientationState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "concepts", "selected_file", "active_revision_id"],
+      "properties": {
+        "status": {
+          "enum": [
+            "not_started",
+            "blocked",
+            "ready",
+            "exploring",
+            "candidate_selected",
+            "revising",
+            "generating",
+            "awaiting_approval",
+            "approved",
+            "stale"
+          ]
+        },
+        "concepts": { "type": "array", "items": { "type": "string" } },
+        "selected_file": { "type": ["string", "null"] },
+        "active_revision_id": { "type": ["string", "null"], "pattern": "^r[0-9]{3,}$" }
+      }
+    }
+  }
+}

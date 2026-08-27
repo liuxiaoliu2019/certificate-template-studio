@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "source_cover": "input/cover-not-included.jpg",
+  "visual_priority": [
+    "illustration_style",
+    "core_elements",
+    "color_palette",
+    "mood",
+    "composition"
+  ],
+  "illustration_style": {
+    "summary": "明亮、友好的低龄儿童卡通插画",
+    "rendering": "柔和数字绘制，色块清晰，光线温暖",
+    "line_and_shape": "圆润造型、亲和角色比例、轮廓简洁",
+    "detail_density": "边缘场景细节中等，核心阅读区域应显著减弱"
+  },
+  "core_elements": [
+    {
+      "name": "儿童学习角色",
+      "role": "primary",
+      "adaptation": "最多保留两名，放在左右侧缘或上部边缘，不侵入正文与右下"
+    },
+    {
+      "name": "田园草地与小花",
+      "role": "secondary",
+      "adaptation": "沿底边与角部形成柔和装饰，不做封面式完整场景"
+    },
+    {
+      "name": "农场动物线索",
+      "role": "atmospheric",
+      "adaptation": "少量点到为止，避免在右下形成强主视觉"
+    }
+  ],
+  "color_palette": [
+    { "name": "天空蓝", "hex": "#73C9EE", "role": "primary" },
+    { "name": "草地绿", "hex": "#65B84B", "role": "secondary" },
+    { "name": "阳光黄", "hex": "#F4CF4D", "role": "accent" },
+    { "name": "暖白", "hex": "#FFF9E9", "role": "background" }
+  ],
+  "mood": ["活泼", "阳光", "童趣", "探索感", "英语学习氛围"],
+  "composition_cues": [
+    "角色和自然元素形成轻微对角动势",
+    "蓝天与草地提供开阔感",
+    "证书版本不复刻原封面纵向构图"
+  ],
+  "certificate_adaptation": {
+    "preserve": ["明亮卡通画风", "蓝绿主色", "友好学习角色", "田园自然线索"],
+    "transform": ["把完整场景拆解为外围装饰", "减少角色数量", "强化中央暖白安全区"],
+    "quiet_zone_notes": "右下不放人物、动物、建筑或大花丛，只保留淡草叶或浅色气氛。"
+  },
+  "avoid_copying": [
+    "出版社文字或 Logo",
+    "虚构教材标题图形",
+    "级别数字与 Second Edition",
+    "出版社信息与封面文字排版",
+    "原封面完整构图"
+  ],
+  "notes": ["这是不含教材图片的教学示例，不表示任何官方授权或联名。"]
+}

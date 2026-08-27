@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/template_dna.schema.json",
+  "title": "Certificate Template DNA",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_template", "source_dimensions", "source_orientation", "design_character", "frame", "palette", "materials", "non_text_decorations", "safe_zones", "text_regions", "orientation_adaptation"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "source_template": { "type": "string", "minLength": 1 },
+    "source_dimensions": { "$ref": "#/$defs/dimensions" },
+    "source_orientation": { "$ref": "#/$defs/orientation" },
+    "design_character": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["formality", "symmetry", "summary"],
+      "properties": {
+        "formality": { "enum": ["light", "standard", "grand"] },
+        "symmetry": { "enum": ["symmetric", "balanced_asymmetric"] },
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["structure", "language", "layers", "corner_strategy", "repeat_rhythm", "line_weight_relationship"],
+      "properties": {
+        "structure": { "enum": ["full_frame", "corner_connected", "open_frame", "illustrated_perimeter"] },
+        "language": { "enum": ["classic_double_line", "european_ornamental", "modern_geometric", "botanical_vine", "storybook_sculpted", "other"] },
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "relative_position", "visual_role", "appearance"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "relative_position": { "type": "string", "minLength": 1 },
+              "visual_role": { "type": "string", "minLength": 1 },
+              "appearance": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "corner_strategy": { "type": "string", "minLength": 1 },
+        "repeat_rhythm": { "type": "string", "minLength": 1 },
+        "line_weight_relationship": { "type": "string", "minLength": 1 }
+      }
+    },
+    "palette": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "hex", "role"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "role": { "enum": ["primary", "secondary", "accent", "background"] }
+        }
+      }
+    },
+    "materials": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "non_text_decorations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "position", "identity", "adaptation"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "position": { "type": "string", "minLength": 1 },
+          "identity": { "type": "string", "minLength": 1 },
+          "adaptation": { "enum": ["preserve_position", "reposition_proportionally", "omit_if_needed"] }
+        }
+      }
+    },
+    "safe_zones": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "body", "recipient", "signature_date"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "body": { "type": "string", "minLength": 1 },
+        "recipient": { "type": "string", "minLength": 1 },
+        "signature_date": { "type": "string", "minLength": 1 }
+      }
+    },
+    "text_regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["content_type", "region", "action"],
+        "properties": {
+          "content_type": { "enum": ["title", "subtitle", "body", "recipient", "signature", "date", "school", "logo_or_watermark", "other"] },
+          "region": { "$ref": "#/$defs/region" },
+          "action": { "const": "remove" }
+        }
+      }
+    },
+    "orientation_adaptation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preserve", "same_orientation", "opposite_orientation", "prohibited"],
+      "properties": {
+        "preserve": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "same_orientation": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "opposite_orientation": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "prohibited": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "requires_character_identity": { "type": "boolean" },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "orientation": { "enum": ["landscape", "portrait"] },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width_px", "height_px", "aspect_ratio"],
+      "properties": {
+        "width_px": { "type": "integer", "minimum": 1 },
+        "height_px": { "type": "integer", "minimum": 1 },
+        "aspect_ratio": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/style_dna.schema.json",
+  "title": "Certificate Style DNA",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_cover",
+    "visual_priority",
+    "illustration_style",
+    "core_elements",
+    "color_palette",
+    "mood",
+    "composition_cues",
+    "certificate_adaptation",
+    "avoid_copying"
+  ],
+  "properties": {
+    "schema_version": { "enum": ["1.0", "1.1"] },
+    "source_cover": { "type": "string", "minLength": 1 },
+    "visual_priority": {
+      "const": [
+        "illustration_style",
+        "core_elements",
+        "color_palette",
+        "mood",
+        "composition"
+      ]
+    },
+    "illustration_style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "rendering", "line_and_shape", "detail_density"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 },
+        "rendering": { "type": "string", "minLength": 1 },
+        "line_and_shape": { "type": "string", "minLength": 1 },
+        "detail_density": { "type": "string", "minLength": 1 }
+      }
+    },
+    "core_elements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "role", "adaptation"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["primary", "secondary", "atmospheric"] },
+          "adaptation": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "color_palette": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "hex", "role"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "role": { "enum": ["primary", "secondary", "accent", "background"] }
+        }
+      }
+    },
+    "mood": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "composition_cues": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "certificate_adaptation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preserve", "transform", "quiet_zone_notes"],
+      "properties": {
+        "preserve": { "type": "array", "items": { "type": "string" } },
+        "transform": { "type": "array", "items": { "type": "string" } },
+        "quiet_zone_notes": { "type": "string", "minLength": 1 }
+      }
+    },
+    "avoid_copying": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "source_medium": { "enum": ["photography", "realistic_illustration", "flat_illustration", "hand_drawn", "watercolor", "mixed_media", "other"] },
+    "audience_stage": { "type": "string", "minLength": 1 },
+    "subject_themes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "media_translation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed", "preserve_identity", "preferred_media"],
+      "properties": {
+        "allowed": { "const": true },
+        "preserve_identity": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "preferred_media": {
+          "type": "array",
+          "items": { "enum": ["flat", "hand_drawn", "watercolor", "paper_texture", "line_art"] }
+        }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

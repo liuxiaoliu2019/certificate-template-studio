@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.1",
+  "mode": "template_bidirectional",
+  "selected_mode": "template_bidirectional",
+  "project_id": "classic-blue-bidirectional",
+  "display_name": "Classic Blue Bidirectional",
+  "created_at": "2026-08-27T08:00:00Z",
+  "updated_at": "2026-08-27T08:30:00Z",
+  "source_template": "input/source_template-not-included.jpg",
+  "source_orientation": "landscape",
+  "opposite_orientation": "portrait",
+  "source_dimensions": {
+    "width_px": 1600,
+    "height_px": 1133
+  },
+  "template_dna_path": "analysis/template_dna.json",
+  "current_title": "结业证书",
+  "workflow": {
+    "stage": "source_approved"
+  },
+  "source_lock": {
+    "status": "source_locked",
+    "user_supplied": true
+  },
+  "controls": {
+    "landscape": "controls/landscape_v3.png",
+    "portrait": "controls/portrait_v3.png",
+    "mode": "soft"
+  },
+  "landscape": {
+    "status": "approved",
+    "concepts": ["landscape/source-regenerated-not-included.png"],
+    "selected_file": "landscape/source-regenerated-not-included.png",
+    "active_revision_id": null
+  },
+  "portrait": {
+    "status": "ready",
+    "concepts": [],
+    "selected_file": null,
+    "active_revision_id": null
+  },
+  "master": {
+    "landscape": "landscape/source-regenerated-not-included.png",
+    "portrait": null,
+    "title": "结业证书",
+    "template_dna": "analysis/template_dna.json"
+  },
+  "derivatives": [],
+  "approvals": [
+    {
+      "orientation": "landscape",
+      "artifact": "landscape/source-regenerated-not-included.png",
+      "user_confirmation": "确认横版定稿",
+      "approved_at": "2026-08-27T08:30:00Z"
+    }
+  ],
+  "revision_log_path": "revisions/revision_log.json"
+}

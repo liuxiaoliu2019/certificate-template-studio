@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/revision_log.schema.json",
+  "title": "Certificate Revision Log",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "project_id", "sequence", "active_by_orientation", "entries"],
+  "properties": {
+    "schema_version": { "enum": ["1.0", "1.1"] },
+    "project_id": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "active_by_orientation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landscape", "portrait"],
+      "properties": {
+        "landscape": { "type": ["string", "null"], "pattern": "^r[0-9]{3,}$" },
+        "portrait": { "type": ["string", "null"], "pattern": "^r[0-9]{3,}$" }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision_id",
+          "orientation",
+          "action",
+          "level",
+          "source",
+          "artifact",
+          "sha256",
+          "feedback",
+          "rollback_to",
+          "created_at"
+        ],
+        "properties": {
+          "revision_id": { "type": "string", "pattern": "^r[0-9]{3,}$" },
+          "orientation": { "enum": ["landscape", "portrait"] },
+          "action": { "enum": ["revision", "rollback"] },
+          "level": { "type": ["integer", "null"], "minimum": 1, "maximum": 3 },
+          "source": { "type": ["string", "null"] },
+          "artifact": { "type": ["string", "null"] },
+          "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+          "feedback": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "rollback_to": { "type": ["string", "null"], "pattern": "^r[0-9]{3,}$" },
+          "created_at": { "type": "string", "format": "date-time" }
+          ,"style_family": {
+            "type": ["string", "null"],
+            "enum": [
+              null,
+              "S01_classic_ceremonial_gold",
+              "S02_modern_academic_geometry",
+              "S03_dark_premium_technology",
+              "S04_fresh_botanical_watercolor",
+              "S05_childrens_flat_education",
+              "S06_themed_dynamic_event",
+              "S07_chinese_ceremonial_award"
+            ]
+          },
+          "style_profile": { "type": ["string", "null"] },
+          "changed_parameters": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "locked_parameters": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "approval_state_before": { "type": ["string", "null"] },
+          "approval_state_after": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

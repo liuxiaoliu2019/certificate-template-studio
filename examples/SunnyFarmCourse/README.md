@@ -1,0 +1,7 @@
+# SunnyFarmCourse 文本示例
+
+本目录使用完全虚构的儿童农场教材，演示配置、Style DNA、人物与动物身份锁、角色主导/平衡/完整边框三种设计角色、7 选 3 风格推荐、评分、Master Profile 和 revision 记录。
+
+为避免复制教材版权内容，本示例不包含教材封面、生成图片、Logo、教材标题图形或出版社素材。JSON 中的图片路径仅用于说明真实项目会如何记录文件，不代表这些图片包含在 Skill 包中。
+
+示例标题为“英语之星”。`character_identity.json` 只含文字描述和示意区域，不包含教材图片。`project_manifest.json` 保留为 v1.0 兼容性样例并停在横版审批前，用来强调选择和修改不等于批准。`style_recommendation.json` 演示 v1.4 的人物身份锁与完整边框 Profile；旧 Master 数据仍保持向后兼容。

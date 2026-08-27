@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.1",
+  "source_cover": "input/fictional-cover-not-included.png",
+  "visual_priority": ["illustration_style", "core_elements", "color_palette", "mood", "composition"],
+  "illustration_style": { "summary": "克制的植物手绘与纸张肌理", "rendering": "细线植物配少量透明水彩", "line_and_shape": "纤细枝叶、对称弧线和简洁徽章形", "detail_density": "外围中等、中央很低" },
+  "core_elements": [
+    { "name": "月桂与细叶", "role": "primary", "adaptation": "沿左右和底边形成连续但不封闭的典礼装饰" },
+    { "name": "暖色纸张", "role": "secondary", "adaptation": "作为全局材质，不生成仿旧污渍" },
+    { "name": "柔和晨光", "role": "atmospheric", "adaptation": "用浅金渐变连接边缘" }
+  ],
+  "color_palette": [
+    { "name": "鼠尾草绿", "hex": "#789478", "role": "primary" },
+    { "name": "柔金", "hex": "#C9A85D", "role": "secondary" },
+    { "name": "暖红", "hex": "#A94A3F", "role": "accent" },
+    { "name": "象牙白", "hex": "#F7F0DF", "role": "background" }
+  ],
+  "mood": ["正式", "自然", "克制", "温暖"],
+  "composition_cues": ["对称植物边缘", "中央轴线稳定", "底边有连续枝叶"],
+  "certificate_adaptation": { "preserve": ["细叶", "暖纸", "克制典礼感"], "transform": ["植物集中到外围", "减少中央纹理"], "quiet_zone_notes": "右下内侧保持浅纸张，外沿保留细叶和金线。" },
+  "avoid_copying": ["任何机构徽标", "具体奖章", "参考作品边框", "示例文字"],
+  "source_medium": "mixed_media",
+  "audience_stage": "全年龄正式课程",
+  "subject_themes": ["成长", "自然", "荣誉"],
+  "media_translation": { "allowed": true, "preserve_identity": ["植物细线", "暖色纸张", "典礼秩序"], "preferred_media": ["watercolor", "paper_texture", "line_art"] },
+  "notes": ["完全虚构的测试配置。"]
+}

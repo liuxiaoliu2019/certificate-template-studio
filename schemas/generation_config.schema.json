@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/generation_config.schema.json",
+  "title": "Certificate Generation Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "candidate_count",
+    "control_mode",
+    "control_templates",
+    "zone_strengths",
+    "title",
+    "outputs",
+    "revision_policy",
+    "multi_title_policy"
+  ],
+  "properties": {
+    "schema_version": { "enum": ["1.0", "1.1", "1.2"] },
+    "candidate_count": { "const": 3 },
+    "control_mode": { "const": "soft" },
+    "control_templates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landscape", "portrait"],
+      "properties": {
+        "landscape": { "type": "string", "minLength": 1 },
+        "portrait": { "type": "string", "minLength": 1 }
+      }
+    },
+    "zone_strengths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["main_decoration", "secondary_decoration", "transition", "signature_quiet_zone", "body_safe_zone"],
+      "properties": {
+        "main_decoration": { "const": 80 },
+        "secondary_decoration": { "const": 50 },
+        "transition": { "const": 20 },
+        "signature_quiet_zone": { "const": 12 },
+        "body_safe_zone": { "const": 8 }
+      }
+    },
+    "title": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "source", "only_readable_text", "horizontal_center_x_percent", "portrait_up_shift_cm", "portrait_up_shift_canvas_percent", "forbidden_containers"],
+      "properties": {
+        "value": { "type": ["string", "null"] },
+        "source": { "const": "manual_user_input" },
+        "only_readable_text": { "const": true },
+        "horizontal_center_x_percent": { "const": 50 },
+        "portrait_up_shift_cm": { "const": 1.5 },
+        "portrait_up_shift_canvas_percent": { "const": 5.05 },
+        "forbidden_containers": {
+          "type": "array",
+          "contains": { "const": "banner" },
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landscape", "portrait"],
+      "properties": {
+        "landscape": { "$ref": "#/$defs/outputSpec" },
+        "portrait": { "$ref": "#/$defs/outputSpec" }
+      }
+    },
+    "revision_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preserve_history", "allow_rollback", "levels"],
+      "properties": {
+        "preserve_history": { "const": true },
+        "allow_rollback": { "const": true },
+        "levels": { "const": [1, 2, 3] }
+      }
+    },
+    "identity_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "appearance_policy", "minimum_score", "max_auto_corrections", "reference_dir"],
+      "properties": {
+        "scope": { "const": "all_human_and_animal_characters" },
+        "appearance_policy": { "const": "optional_but_faithful_when_used" },
+        "minimum_score": { "const": 85 },
+        "max_auto_corrections": { "const": 2 },
+        "reference_dir": { "const": "analysis/character_refs" }
+      }
+    },
+    "concept_roles": {
+      "const": ["cover_character_led", "balanced_translation", "frame_led"]
+    },
+    "style_engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "library_size", "recommendation_count", "minimum_compatibility_score", "weights", "require_distinct_families", "minimum_pairwise_parameter_differences"],
+      "properties": {
+        "enabled": { "const": true },
+        "library_size": { "const": 7 },
+        "recommendation_count": { "const": 3 },
+        "minimum_compatibility_score": { "const": 70 },
+        "weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["illustration_style", "core_elements", "color_palette", "mood", "composition"],
+          "properties": {
+            "illustration_style": { "const": 35 },
+            "core_elements": { "const": 25 },
+            "color_palette": { "const": 20 },
+            "mood": { "const": 15 },
+            "composition": { "const": 5 }
+          }
+        },
+        "require_distinct_families": { "const": true },
+        "minimum_pairwise_parameter_differences": { "const": 3 }
+      }
+    },
+    "multi_title_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reuse_approved_master_by_default", "explore_three_only_on_explicit_request"],
+      "properties": {
+        "reuse_approved_master_by_default": { "const": true },
+        "explore_three_only_on_explicit_request": { "const": true }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "schema_version": { "const": "1.2" } } },
+      "then": { "required": ["style_engine", "identity_policy", "concept_roles"] }
+    }
+  ],
+  "$defs": {
+    "outputSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width_px", "height_px", "dpi"],
+      "properties": {
+        "width_px": { "type": "integer", "minimum": 1 },
+        "height_px": { "type": "integer", "minimum": 1 },
+        "dpi": { "const": 300 }
+      }
+    }
+  }
+}

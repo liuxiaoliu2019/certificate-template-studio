@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "title": "优秀学员",
+  "weights": { "illustration_style": 35, "core_elements": 25, "color_palette": 20, "mood": 15, "composition": 5 },
+  "minimum_score": 70,
+  "evaluations": [
+    { "style_family": "S01_classic_ceremonial_gold", "scores": { "illustration_style": 33, "core_elements": 23, "color_palette": 19, "mood": 15, "composition": 5 }, "total": 95, "qualified": true, "reason": "金线、暖纸和月桂与正式自然主题高度一致。", "adapted": false, "adaptation": null },
+    { "style_family": "S02_modern_academic_geometry", "scores": { "illustration_style": 27, "core_elements": 18, "color_palette": 17, "mood": 12, "composition": 4 }, "total": 78, "qualified": true, "reason": "可将枝叶提炼为现代线性模块，但自然气息会减弱。", "adapted": true, "adaptation": "使用圆角细线而非硬直几何。" },
+    { "style_family": "S03_dark_premium_technology", "scores": { "illustration_style": 15, "core_elements": 12, "color_palette": 12, "mood": 9, "composition": 3 }, "total": 51, "qualified": false, "reason": "科技深色语言与温暖植物纸张冲突。", "adapted": false, "adaptation": null },
+    { "style_family": "S04_fresh_botanical_watercolor", "scores": { "illustration_style": 35, "core_elements": 24, "color_palette": 19, "mood": 14, "composition": 5 }, "total": 97, "qualified": true, "reason": "透明水彩和植物边缘是最直接的风格延续。", "adapted": false, "adaptation": null },
+    { "style_family": "S05_childrens_flat_education", "scores": { "illustration_style": 18, "core_elements": 16, "color_palette": 16, "mood": 9, "composition": 3 }, "total": 62, "qualified": false, "reason": "儿童扁平语言会降低既定正式度。", "adapted": false, "adaptation": null },
+    { "style_family": "S06_themed_dynamic_event", "scores": { "illustration_style": 20, "core_elements": 17, "color_palette": 16, "mood": 10, "composition": 3 }, "total": 66, "qualified": false, "reason": "主题动势不符合克制典礼目标。", "adapted": false, "adaptation": null },
+    { "style_family": "S07_chinese_ceremonial_award", "scores": { "illustration_style": 29, "core_elements": 20, "color_palette": 18, "mood": 14, "composition": 5 }, "total": 86, "qualified": true, "reason": "暖红、柔金和对称秩序可形成现代简化中式奖状。", "adapted": true, "adaptation": "降低红色占比，使用概括化植物纹样。" }
+  ],
+  "recommended_profiles": [
+    { "schema_version": "1.0", "profile_id": "formal-s04", "style_family": "S04_fresh_botanical_watercolor", "compatibility_score": 97, "compatibility_reason": "植物水彩直接延续主题。", "parameters": { "density": "medium", "symmetry": "balanced_asymmetric", "illustration_medium": "watercolor", "ceremony_level": "light", "textbook_fusion": "prominent", "character_usage": "none", "background_material": "soft_wash", "corner_connection": "environment_bridge", "title_position": "canvas_center" }, "style_strategy": "植物沿四周自然生长，左右角叶簇清晰，底边以渐小细叶和晨光连接。", "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品"] },
+    { "schema_version": "1.0", "profile_id": "formal-s01", "style_family": "S01_classic_ceremonial_gold", "compatibility_score": 95, "compatibility_reason": "暖纸、金线和月桂具有稳定典礼感。", "parameters": { "density": "rich", "symmetry": "symmetric", "illustration_medium": "paper_texture", "ceremony_level": "grand", "textbook_fusion": "balanced", "character_usage": "corner_character", "background_material": "textured_paper", "corner_connection": "line_bridge", "title_position": "canvas_center" }, "style_strategy": "金色细框与概括月桂形成对称秩序，左右角同权重，底边以细金线桥接。", "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品"] },
+    { "schema_version": "1.0", "profile_id": "formal-s07", "style_family": "S07_chinese_ceremonial_award", "compatibility_score": 86, "compatibility_reason": "暖红柔金和中央轴线适合现代中式表彰。", "parameters": { "density": "light", "symmetry": "symmetric", "illustration_medium": "line_art", "ceremony_level": "standard", "textbook_fusion": "conservative", "character_usage": "none", "background_material": "clean_paper", "corner_connection": "tapered_continuous", "title_position": "canvas_center" }, "style_strategy": "使用简化红金植物纹样而非传统徽记，左右角稳定并向底边渐弱连接。", "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品"], "adaptation_notes": ["传统元素保持概括化，不仿制机构符号。"] }
+  ],
+  "diversity_check": {
+    "passed": true,
+    "pairwise_differences": [
+      { "profiles": ["formal-s04", "formal-s01"], "different_parameters": ["density", "symmetry", "illustration_medium", "ceremony_level", "textbook_fusion", "character_usage", "background_material", "corner_connection"] },
+      { "profiles": ["formal-s04", "formal-s07"], "different_parameters": ["density", "symmetry", "illustration_medium", "ceremony_level", "textbook_fusion", "background_material", "corner_connection"] },
+      { "profiles": ["formal-s01", "formal-s07"], "different_parameters": ["density", "illustration_medium", "ceremony_level", "textbook_fusion", "character_usage", "background_material", "corner_connection"] }
+    ],
+    "notes": ["三套分别体现自然水彩、西式典礼金纹和现代中式典礼。"]
+  }
+}

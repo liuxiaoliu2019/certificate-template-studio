@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.1",
+  "textbook_key": "SunnyFarmCourse",
+  "source_style_dna": "analysis/style_dna.json",
+  "source_character_identity": "analysis/character_identity.json",
+  "used_character_ids": ["boy-explorer", "girl-explorer"],
+  "approved_style_profile": {
+    "schema_version": "1.1",
+    "profile_id": "sunny-farm-s05",
+    "style_family": "S05_childrens_flat_education",
+    "compatibility_score": 95,
+    "compatibility_reason": "儿童扁平语言最能保留教材的圆润角色与活跃色彩。",
+    "parameters": { "density": "medium", "symmetry": "balanced_asymmetric", "illustration_medium": "flat", "ceremony_level": "light", "textbook_fusion": "prominent", "character_usage": "corner_character", "background_material": "geometric_field", "corner_connection": "tapered_continuous", "title_position": "canvas_center", "concept_role": "cover_character_led", "frame_structure": "illustrated_perimeter", "frame_language": "storybook_sculpted" },
+    "style_strategy": "左右角以角色和田园物件形成锚点，底边以变小草叶和花朵弱连接，中央暖白退让。",
+    "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品", "人物身份锁"],
+    "used_character_ids": ["boy-explorer", "girl-explorer"]
+  },
+  "master_title": "英语之星",
+  "masters": { "landscape": "selected/master-landscape-not-included.png", "portrait": "portrait/master-portrait-not-included.png" },
+  "title_rules": { "only_readable_text": true, "horizontal_center_x_percent": 50, "portrait_up_shift_cm": 1.5 },
+  "composition_invariants": ["左右下角均有可见锚点", "边缘由大到小弱连接", "中央和落款区可排版", "控制图不进入成品"],
+  "created_at": "2026-08-26T00:00:00Z",
+  "updated_at": "2026-08-26T00:00:00Z"
+}

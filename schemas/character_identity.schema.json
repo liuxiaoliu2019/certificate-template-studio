@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/character_identity.schema.json",
+  "title": "Textbook Character Identity Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_cover", "policy", "characters"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "source_cover": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity_scope", "appearance_policy", "minimum_score", "max_auto_corrections"],
+      "properties": {
+        "identity_scope": { "const": "all_human_and_animal_characters" },
+        "appearance_policy": { "const": "optional_but_faithful_when_used" },
+        "minimum_score": { "const": 85 },
+        "max_auto_corrections": { "const": 2 }
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/character" }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    },
+    "traits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["head_and_face", "body_and_proportions", "clothing_or_surface", "accessories", "palette", "distinctive_markers"],
+      "properties": {
+        "head_and_face": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "body_and_proportions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "clothing_or_surface": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "accessories": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "palette": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "distinctive_markers": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "character": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["character_id", "display_name", "category", "source_region", "traits", "immutable_traits", "allowed_transformations", "forbidden_changes", "unverified_traits", "reference_crop"],
+      "properties": {
+        "character_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "category": { "enum": ["human", "animal"] },
+        "source_region": { "$ref": "#/$defs/region" },
+        "traits": { "$ref": "#/$defs/traits" },
+        "immutable_traits": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "allowed_transformations": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "forbidden_changes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "unverified_traits": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "reference_crop": { "type": "string", "pattern": "^analysis/character_refs/[a-z0-9][a-z0-9-]*\\.png$" }
+      }
+    }
+  }
+}

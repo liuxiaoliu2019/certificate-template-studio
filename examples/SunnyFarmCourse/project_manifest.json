@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "project_id": "sunny-farm-course",
+  "textbook_key": "SunnyFarmCourse",
+  "created_at": "2026-08-25T00:00:00Z",
+  "updated_at": "2026-08-25T00:10:00Z",
+  "source_cover": "input/cover-not-included.jpg",
+  "style_dna_path": "analysis/style_dna.json",
+  "current_title": "英语之星",
+  "workflow": { "stage": "awaiting_landscape_approval" },
+  "controls": {
+    "landscape": "controls/landscape_v3.png",
+    "portrait": "controls/portrait_v3.png",
+    "mode": "soft",
+    "zone_strengths": { "Z80": 80, "Z50": 50, "Z20": 20, "Z12": 12, "Z08": 8 }
+  },
+  "landscape": {
+    "status": "revising",
+    "concepts": [
+      "concepts/landscape_01-not-included.png",
+      "concepts/landscape_02-not-included.png",
+      "concepts/landscape_03-not-included.png"
+    ],
+    "selected_file": "revisions/landscape_r001-not-included.png",
+    "active_revision_id": "r001"
+  },
+  "portrait": {
+    "status": "blocked",
+    "concepts": [],
+    "selected_file": null,
+    "active_revision_id": null
+  },
+  "master": { "landscape": null, "portrait": null, "title": null },
+  "derivatives": [],
+  "approvals": [],
+  "revision_log_path": "revisions/revision_log.json"
+}

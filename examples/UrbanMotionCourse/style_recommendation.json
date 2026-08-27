@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "title": "结业证书",
+  "weights": { "illustration_style": 35, "core_elements": 25, "color_palette": 20, "mood": 15, "composition": 5 },
+  "minimum_score": 70,
+  "evaluations": [
+    { "style_family": "S01_classic_ceremonial_gold", "scores": { "illustration_style": 18, "core_elements": 14, "color_palette": 15, "mood": 11, "composition": 4 }, "total": 62, "qualified": false, "reason": "传统金纹会削弱城市运动与现代气质。", "adapted": false, "adaptation": null },
+    { "style_family": "S02_modern_academic_geometry", "scores": { "illustration_style": 34, "core_elements": 23, "color_palette": 19, "mood": 14, "composition": 4 }, "total": 94, "qualified": true, "reason": "几何模块和线性城市节奏适合摄影封面的现代转译。", "adapted": true, "adaptation": "具体摄影人物转为抽象边缘线稿。" },
+    { "style_family": "S03_dark_premium_technology", "scores": { "illustration_style": 32, "core_elements": 22, "color_palette": 19, "mood": 14, "composition": 4 }, "total": 91, "qualified": true, "reason": "蓝紫粉尘、城市和思考主题能自然进入深色科技语言。", "adapted": true, "adaptation": "降低满版深度，保留变量区可读性。" },
+    { "style_family": "S04_fresh_botanical_watercolor", "scores": { "illustration_style": 18, "core_elements": 13, "color_palette": 15, "mood": 9, "composition": 3 }, "total": 58, "qualified": false, "reason": "植物水彩与城市街头主题缺少直接联系。", "adapted": false, "adaptation": null },
+    { "style_family": "S05_childrens_flat_education", "scores": { "illustration_style": 24, "core_elements": 19, "color_palette": 17, "mood": 10, "composition": 4 }, "total": 74, "qualified": true, "reason": "可扁平化人物和城市，但需要降低低龄感。", "adapted": true, "adaptation": "使用青少年比例与克制色块，取消幼儿式圆润边框。" },
+    { "style_family": "S06_themed_dynamic_event", "scores": { "illustration_style": 31, "core_elements": 23, "color_palette": 17, "mood": 13, "composition": 4 }, "total": 88, "qualified": true, "reason": "运动人物和城市透视适合形成边缘动势。", "adapted": true, "adaptation": "把海报式主视觉缩到外围，并保留证书中央秩序。" },
+    { "style_family": "S07_chinese_ceremonial_award", "scores": { "illustration_style": 14, "core_elements": 12, "color_palette": 12, "mood": 9, "composition": 3 }, "total": 50, "qualified": false, "reason": "传统红金语言与现代城市摄影距离过大。", "adapted": false, "adaptation": null }
+  ],
+  "recommended_profiles": [
+    { "schema_version": "1.0", "profile_id": "urban-motion-s02", "style_family": "S02_modern_academic_geometry", "compatibility_score": 94, "compatibility_reason": "现代几何最适合转译城市摄影和青少年气质。", "parameters": { "density": "light", "symmetry": "balanced_asymmetric", "illustration_medium": "line_art", "ceremony_level": "standard", "textbook_fusion": "balanced", "character_usage": "edge_scene", "background_material": "clean_paper", "corner_connection": "line_bridge", "title_position": "canvas_center" }, "style_strategy": "城市线稿沿左右边缘组织，蓝紫模块形成平衡锚点，底部以细线透视弱连接。", "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品"], "adaptation_notes": ["若使用摄影人物，线稿化时仍须通过独立身份锁保持其可见头部、脸部、服装和姿态识别。"] },
+    { "schema_version": "1.0", "profile_id": "urban-motion-s03", "style_family": "S03_dark_premium_technology", "compatibility_score": 91, "compatibility_reason": "蓝紫粉尘和城市思考主题适合深色科技证书。", "parameters": { "density": "medium", "symmetry": "symmetric", "illustration_medium": "line_art", "ceremony_level": "grand", "textbook_fusion": "prominent", "character_usage": "none", "background_material": "dark_full_bleed", "corner_connection": "tapered_continuous", "title_position": "canvas_center" }, "style_strategy": "深蓝底上用蓝紫粒子和金属细线构成四周秩序，左右角以光带锚定并向中央衰减。", "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品"], "adaptation_notes": ["中央使用低对比深色安全区而非白色面板。"] },
+    { "schema_version": "1.0", "profile_id": "urban-motion-s06", "style_family": "S06_themed_dynamic_event", "compatibility_score": 88, "compatibility_reason": "运动姿态和城市透视支持主题动态边缘构图。", "parameters": { "density": "rich", "symmetry": "balanced_asymmetric", "illustration_medium": "flat", "ceremony_level": "light", "textbook_fusion": "prominent", "character_usage": "edge_scene", "background_material": "geometric_field", "corner_connection": "environment_bridge", "title_position": "canvas_center" }, "style_strategy": "运动人物剪影与城市块面分居两侧，路径和粉尘由大到小跨越底边，但主视觉不进入中央。", "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品"], "adaptation_notes": ["限制海报式大人物和口号层级。"] }
+  ],
+  "diversity_check": {
+    "passed": true,
+    "pairwise_differences": [
+      { "profiles": ["urban-motion-s02", "urban-motion-s03"], "different_parameters": ["density", "symmetry", "ceremony_level", "textbook_fusion", "character_usage", "background_material", "corner_connection"] },
+      { "profiles": ["urban-motion-s02", "urban-motion-s06"], "different_parameters": ["density", "illustration_medium", "ceremony_level", "textbook_fusion", "background_material", "corner_connection"] },
+      { "profiles": ["urban-motion-s03", "urban-motion-s06"], "different_parameters": ["density", "symmetry", "illustration_medium", "ceremony_level", "character_usage", "background_material", "corner_connection"] }
+    ],
+    "notes": ["三套分别强调学院秩序、深色科技和主题动势。"]
+  }
+}

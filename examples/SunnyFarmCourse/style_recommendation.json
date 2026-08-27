@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "title": "英语之星",
+  "weights": { "illustration_style": 35, "core_elements": 25, "color_palette": 20, "mood": 15, "composition": 5 },
+  "minimum_score": 70,
+  "evaluations": [
+    { "style_family": "S01_classic_ceremonial_gold", "scores": { "illustration_style": 20, "core_elements": 19, "color_palette": 17, "mood": 13, "composition": 4 }, "total": 73, "qualified": true, "reason": "可用轻典礼版承接课程奖励，但会削弱原有儿童活力。", "adapted": false, "adaptation": null },
+    { "style_family": "S02_modern_academic_geometry", "scores": { "illustration_style": 31, "core_elements": 20, "color_palette": 18, "mood": 13, "composition": 4 }, "total": 86, "qualified": true, "reason": "圆润几何与蓝绿主色能保持现代少儿学习气质。", "adapted": false, "adaptation": null },
+    { "style_family": "S03_dark_premium_technology", "scores": { "illustration_style": 12, "core_elements": 13, "color_palette": 12, "mood": 8, "composition": 3 }, "total": 48, "qualified": false, "reason": "深色科技语言与低龄田园卡通气质冲突。", "adapted": false, "adaptation": null },
+    { "style_family": "S04_fresh_botanical_watercolor", "scores": { "illustration_style": 32, "core_elements": 22, "color_palette": 18, "mood": 14, "composition": 4 }, "total": 90, "qualified": true, "reason": "田园、小花和天空可自然转译为外围水彩环境。", "adapted": false, "adaptation": null },
+    { "style_family": "S05_childrens_flat_education", "scores": { "illustration_style": 35, "core_elements": 24, "color_palette": 19, "mood": 13, "composition": 4 }, "total": 95, "qualified": true, "reason": "与圆润儿童角色、明亮蓝绿配色和学习气质高度一致。", "adapted": false, "adaptation": null },
+    { "style_family": "S06_themed_dynamic_event", "scores": { "illustration_style": 29, "core_elements": 22, "color_palette": 17, "mood": 11, "composition": 3 }, "total": 82, "qualified": true, "reason": "可转为探索主题，但需要限制动感以保留证书结构。", "adapted": true, "adaptation": "将海报式动势降低为边缘探索轨迹。" },
+    { "style_family": "S07_chinese_ceremonial_award", "scores": { "illustration_style": 16, "core_elements": 15, "color_palette": 15, "mood": 12, "composition": 4 }, "total": 62, "qualified": false, "reason": "红金传统秩序与教材的蓝绿田园语言距离较大。", "adapted": false, "adaptation": null }
+  ],
+  "recommended_profiles": [
+    {
+      "schema_version": "1.1",
+      "profile_id": "sunny-farm-s05",
+      "style_family": "S05_childrens_flat_education",
+      "compatibility_score": 95,
+      "compatibility_reason": "儿童扁平语言最能保留教材的圆润角色与活跃色彩。",
+      "parameters": { "density": "medium", "symmetry": "balanced_asymmetric", "illustration_medium": "flat", "ceremony_level": "light", "textbook_fusion": "prominent", "character_usage": "corner_character", "background_material": "geometric_field", "corner_connection": "tapered_continuous", "title_position": "canvas_center", "concept_role": "cover_character_led", "frame_structure": "illustrated_perimeter", "frame_language": "storybook_sculpted" },
+      "style_strategy": "左右角以角色和田园物件形成锚点，底边以变小草叶和花朵弱连接，中央暖白退让。",
+      "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品", "人物身份锁"],
+      "used_character_ids": ["boy-explorer", "girl-explorer"]
+    },
+    {
+      "schema_version": "1.1",
+      "profile_id": "sunny-farm-s04",
+      "style_family": "S04_fresh_botanical_watercolor",
+      "compatibility_score": 90,
+      "compatibility_reason": "田园和花草元素适合转译为通透水彩外围。",
+      "parameters": { "density": "rich", "symmetry": "symmetric", "illustration_medium": "watercolor", "ceremony_level": "standard", "textbook_fusion": "balanced", "character_usage": "edge_scene", "background_material": "soft_wash", "corner_connection": "environment_bridge", "title_position": "canvas_center", "concept_role": "balanced_translation", "frame_structure": "corner_connected", "frame_language": "botanical_vine" },
+      "style_strategy": "花草和天空色沿四周生长，两侧以渐小叶片和草地气氛连续，中央保持通透。",
+      "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品", "人物身份锁"],
+      "used_character_ids": ["sheep-character"]
+    },
+    {
+      "schema_version": "1.1",
+      "profile_id": "sunny-farm-s02",
+      "style_family": "S02_modern_academic_geometry",
+      "compatibility_score": 86,
+      "compatibility_reason": "教材蓝绿主色和圆润轮廓可提炼为现代学院几何模块。",
+      "parameters": { "density": "light", "symmetry": "balanced_asymmetric", "illustration_medium": "line_art", "ceremony_level": "standard", "textbook_fusion": "conservative", "character_usage": "none", "background_material": "clean_paper", "corner_connection": "line_bridge", "title_position": "canvas_center", "concept_role": "frame_led", "frame_structure": "full_frame", "frame_language": "modern_geometric" },
+      "style_strategy": "用蓝绿细线和小型几何模块建立克制边框，左右角重量均衡，中央留白最大。",
+      "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品"],
+      "used_character_ids": []
+    }
+  ],
+  "diversity_check": {
+    "passed": true,
+    "pairwise_differences": [
+      { "profiles": ["sunny-farm-s05", "sunny-farm-s04"], "different_parameters": ["density", "symmetry", "illustration_medium", "ceremony_level", "textbook_fusion", "character_usage", "background_material", "corner_connection"] },
+      { "profiles": ["sunny-farm-s05", "sunny-farm-s02"], "different_parameters": ["density", "illustration_medium", "ceremony_level", "textbook_fusion", "character_usage", "background_material", "corner_connection"] },
+      { "profiles": ["sunny-farm-s04", "sunny-farm-s02"], "different_parameters": ["density", "symmetry", "illustration_medium", "textbook_fusion", "character_usage", "background_material", "corner_connection"] }
+    ],
+    "notes": ["三套分别突出儿童角色、水彩自然和现代学院秩序。"]
+  }
+}

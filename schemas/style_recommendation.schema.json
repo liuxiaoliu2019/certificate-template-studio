@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/style_recommendation.schema.json",
+  "title": "Certificate Style Recommendation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "title",
+    "weights",
+    "minimum_score",
+    "evaluations",
+    "recommended_profiles",
+    "diversity_check"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "title": { "type": "string", "minLength": 1 },
+    "weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["illustration_style", "core_elements", "color_palette", "mood", "composition"],
+      "properties": {
+        "illustration_style": { "const": 35 },
+        "core_elements": { "const": 25 },
+        "color_palette": { "const": 20 },
+        "mood": { "const": 15 },
+        "composition": { "const": 5 }
+      }
+    },
+    "minimum_score": { "const": 70 },
+    "evaluations": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/evaluation" }
+    },
+    "recommended_profiles": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "$ref": "certificate_style_profile.schema.json" }
+    },
+    "diversity_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passed", "pairwise_differences", "notes"],
+      "properties": {
+        "passed": { "const": true },
+        "pairwise_differences": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["profiles", "different_parameters"],
+            "properties": {
+              "profiles": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "different_parameters": {
+                "type": "array",
+                "minItems": 3,
+                "uniqueItems": true,
+                "items": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "$defs": {
+    "styleFamily": {
+      "enum": [
+        "S01_classic_ceremonial_gold",
+        "S02_modern_academic_geometry",
+        "S03_dark_premium_technology",
+        "S04_fresh_botanical_watercolor",
+        "S05_childrens_flat_education",
+        "S06_themed_dynamic_event",
+        "S07_chinese_ceremonial_award"
+      ]
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["style_family", "scores", "total", "qualified", "reason", "adapted"],
+      "properties": {
+        "style_family": { "$ref": "#/$defs/styleFamily" },
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["illustration_style", "core_elements", "color_palette", "mood", "composition"],
+          "properties": {
+            "illustration_style": { "type": "integer", "minimum": 0, "maximum": 35 },
+            "core_elements": { "type": "integer", "minimum": 0, "maximum": 25 },
+            "color_palette": { "type": "integer", "minimum": 0, "maximum": 20 },
+            "mood": { "type": "integer", "minimum": 0, "maximum": 15 },
+            "composition": { "type": "integer", "minimum": 0, "maximum": 5 }
+          }
+        },
+        "total": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "qualified": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1 },
+        "adapted": { "type": "boolean" },
+        "adaptation": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

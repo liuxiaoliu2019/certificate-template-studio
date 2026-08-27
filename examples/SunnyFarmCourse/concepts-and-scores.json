@@ -1,0 +1,28 @@
+{
+  "title": "英语之星",
+  "directions": [
+    {
+      "id": 1,
+      "name": "田园留白秩序",
+      "different_dimensions": ["边缘装饰更克制", "角色弱化", "标题更庄重"],
+      "scores": { "style": 14, "control": 19, "whitespace": 20, "certificate": 19, "title": 18, "total": 90 },
+      "hard_fail": false
+    },
+    {
+      "id": 2,
+      "name": "角色与标题融合",
+      "different_dimensions": ["双侧角色露出", "标题与花草联动", "视觉重心上移"],
+      "scores": { "style": 19, "control": 16, "whitespace": 19, "certificate": 18, "title": 19, "total": 91 },
+      "hard_fail": false
+    },
+    {
+      "id": 3,
+      "name": "活力边缘叙事",
+      "different_dimensions": ["动物与场景更丰富", "装饰动势更强", "无显性边框"],
+      "scores": { "style": 20, "control": 14, "whitespace": 18, "certificate": 16, "title": 19, "total": 87 },
+      "hard_fail": false
+    }
+  ],
+  "selected_candidate": 2,
+  "selection_is_not_approval": true
+}

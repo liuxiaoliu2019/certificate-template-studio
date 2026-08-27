@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.1",
+  "source_cover": "input/cover-not-included.jpg",
+  "visual_priority": ["illustration_style", "core_elements", "color_palette", "mood", "composition"],
+  "illustration_style": { "summary": "现代城市摄影与彩色粉尘视觉", "rendering": "浅景深城市摄影叠加高饱和粉尘效果", "line_and_shape": "建筑透视线、人物运动姿态与大型几何字形", "detail_density": "边缘城市信息丰富，天空区域开阔" },
+  "core_elements": [
+    { "name": "青少年运动人物", "role": "primary", "adaptation": "转译为边缘剪影、线稿或扁平人物，不复制具体肖像" },
+    { "name": "城市街道透视", "role": "secondary", "adaptation": "提炼为左右边缘建筑节奏和底边路径" },
+    { "name": "蓝紫粉尘", "role": "atmospheric", "adaptation": "作为边缘动势和连接气氛，不侵入中央变量区" }
+  ],
+  "color_palette": [
+    { "name": "天空蓝", "hex": "#8FC8EE", "role": "primary" },
+    { "name": "蓝紫", "hex": "#5149C8", "role": "secondary" },
+    { "name": "暖黄", "hex": "#D1A447", "role": "accent" },
+    { "name": "浅灰白", "hex": "#F4F5F2", "role": "background" }
+  ],
+  "mood": ["现代", "青少年", "城市", "思考", "运动感"],
+  "composition_cues": ["纵向街道透视", "人物位于中下部", "天空形成大留白"],
+  "certificate_adaptation": { "preserve": ["城市感", "蓝紫主色", "青少年运动能量"], "transform": ["摄影转为插画或线稿", "大型教材字形不进入证书", "城市退到外围"], "quiet_zone_notes": "右下偏内侧只保留低对比道路或粉尘气氛，外沿维持城市色彩收边。" },
+  "avoid_copying": ["出版社标识", "教材系列名和级别", "作者文字", "封面大型字形", "具体人物肖像与完整摄影构图"],
+  "source_medium": "photography",
+  "audience_stage": "青少年初级英语学习者",
+  "subject_themes": ["城市探索", "运动", "思考", "语言学习"],
+  "media_translation": { "allowed": true, "preserve_identity": ["城市透视", "蓝紫粉尘", "人物运动姿态"], "preferred_media": ["flat", "line_art"] },
+  "notes": ["本示例只保存抽象分析，不包含教材图片或可识别肖像。"]
+}

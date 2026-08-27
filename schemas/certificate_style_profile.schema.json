@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/certificate_style_profile.schema.json",
+  "title": "Certificate Style Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "style_family",
+    "compatibility_score",
+    "compatibility_reason",
+    "parameters",
+    "style_strategy",
+    "locked_invariants"
+  ],
+  "properties": {
+    "schema_version": { "enum": ["1.0", "1.1"] },
+    "profile_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "style_family": { "$ref": "#/$defs/styleFamily" },
+    "compatibility_score": { "type": "integer", "minimum": 70, "maximum": 100 },
+    "compatibility_reason": { "type": "string", "minLength": 1 },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "density",
+        "symmetry",
+        "illustration_medium",
+        "ceremony_level",
+        "textbook_fusion",
+        "character_usage",
+        "background_material",
+        "corner_connection",
+        "title_position"
+      ],
+      "properties": {
+        "density": { "enum": ["light", "medium", "rich"] },
+        "symmetry": { "enum": ["symmetric", "balanced_asymmetric"] },
+        "illustration_medium": { "enum": ["flat", "hand_drawn", "watercolor", "paper_texture", "line_art"] },
+        "ceremony_level": { "enum": ["light", "standard", "grand"] },
+        "textbook_fusion": { "enum": ["conservative", "balanced", "prominent"] },
+        "character_usage": { "enum": ["none", "corner_character", "edge_scene"] },
+        "background_material": { "enum": ["clean_paper", "textured_paper", "dark_full_bleed", "soft_wash", "geometric_field"] },
+        "corner_connection": { "enum": ["tapered_continuous", "line_bridge", "environment_bridge"] },
+        "title_position": { "const": "canvas_center" },
+        "concept_role": { "enum": ["cover_character_led", "balanced_translation", "frame_led"] },
+        "frame_structure": { "enum": ["full_frame", "corner_connected", "open_frame", "illustrated_perimeter"] },
+        "frame_language": { "enum": ["classic_double_line", "european_ornamental", "modern_geometric", "botanical_vine", "storybook_sculpted"] }
+      }
+    },
+    "style_strategy": { "type": "string", "minLength": 1 },
+    "locked_invariants": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "adaptation_notes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "used_character_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "schema_version": { "const": "1.1" } } },
+      "then": {
+        "required": ["used_character_ids"],
+        "properties": {
+          "parameters": {
+            "required": ["density", "symmetry", "illustration_medium", "ceremony_level", "textbook_fusion", "character_usage", "background_material", "corner_connection", "title_position", "concept_role", "frame_structure", "frame_language"]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "styleFamily": {
+      "enum": [
+        "S01_classic_ceremonial_gold",
+        "S02_modern_academic_geometry",
+        "S03_dark_premium_technology",
+        "S04_fresh_botanical_watercolor",
+        "S05_childrens_flat_education",
+        "S06_themed_dynamic_event",
+        "S07_chinese_ceremonial_award"
+      ]
+    }
+  }
+}

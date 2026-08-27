@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "source_template": "input/source_template-not-included.jpg",
+  "source_dimensions": {
+    "width_px": 1600,
+    "height_px": 1133,
+    "aspect_ratio": 1.4121800529576347
+  },
+  "source_orientation": "landscape",
+  "design_character": {
+    "formality": "grand",
+    "symmetry": "symmetric",
+    "summary": "冷灰蓝双色的正式典礼证书，以连续欧式纹样、双线内框和细密线刻层级建立庄重秩序。"
+  },
+  "frame": {
+    "structure": "full_frame",
+    "language": "european_ornamental",
+    "layers": [
+      {
+        "name": "外侧细线框",
+        "relative_position": "紧贴安全边距以内",
+        "visual_role": "封闭画布并稳定外轮廓",
+        "appearance": "冷灰蓝单细线"
+      },
+      {
+        "name": "主纹样带",
+        "relative_position": "四边连续并在四角转接",
+        "visual_role": "形成主要典礼感和视觉身份",
+        "appearance": "细密扇叶与圆形节点重复纹样"
+      },
+      {
+        "name": "内侧双线框",
+        "relative_position": "主纹样带内侧",
+        "visual_role": "界定正文安全区",
+        "appearance": "深浅两级细线与宽窄留隙"
+      }
+    ],
+    "corner_strategy": "四角采用同一母题的镜像转接，角部密度略高于边中段。",
+    "repeat_rhythm": "长边重复单元较多且节奏均匀，短边按比例减少单元但保持同一尺度感。",
+    "line_weight_relationship": "主轮廓略粗，内部刻线细密，内框最轻，三层线宽关系清晰。"
+  },
+  "palette": [
+    { "name": "冷灰蓝", "hex": "#5E6689", "role": "primary" },
+    { "name": "浅雾蓝", "hex": "#AEB4C9", "role": "secondary" },
+    { "name": "暖白纸色", "hex": "#F4F4EF", "role": "background" }
+  ],
+  "materials": [
+    "细线雕刻感",
+    "哑光纸张",
+    "平整双色印刷"
+  ],
+  "non_text_decorations": [
+    {
+      "name": "四角卷叶线饰",
+      "position": "内框四角",
+      "identity": "细线卷叶与圆点收尾形成的小型对称角花",
+      "adaptation": "reposition_proportionally"
+    },
+    {
+      "name": "底部中央奖章图形",
+      "position": "下部中央",
+      "identity": "几何放射外缘与缎带组合的非文字徽章",
+      "adaptation": "reposition_proportionally"
+    }
+  ],
+  "safe_zones": {
+    "title": "上部中央，标题外接框中心必须位于 x=50%。",
+    "body": "画布中央的大面积暖白区域，保持低装饰密度。",
+    "recipient": "中下部中央，保留一条宽而安静的姓名区域。",
+    "signature_date": "底部左右分列，避开中央奖章与边框。"
+  },
+  "text_regions": [
+    {
+      "content_type": "title",
+      "region": { "x": 0.30, "y": 0.15, "width": 0.40, "height": 0.17 },
+      "action": "remove"
+    },
+    {
+      "content_type": "body",
+      "region": { "x": 0.16, "y": 0.39, "width": 0.68, "height": 0.12 },
+      "action": "remove"
+    },
+    {
+      "content_type": "recipient",
+      "region": { "x": 0.23, "y": 0.55, "width": 0.64, "height": 0.10 },
+      "action": "remove"
+    },
+    {
+      "content_type": "signature",
+      "region": { "x": 0.18, "y": 0.69, "width": 0.64, "height": 0.17 },
+      "action": "remove"
+    }
+  ],
+  "orientation_adaptation": {
+    "preserve": [
+      "冷灰蓝与暖白的比例",
+      "三层边框关系",
+      "扇叶与圆形节点纹样母题",
+      "主粗辅细的线宽层级",
+      "正式对称气质"
+    ],
+    "same_orientation": [
+      "按源比例重建四边与四角",
+      "清除全部源文字后重建连续背景",
+      "仅在上部中央生成用户标题"
+    ],
+    "opposite_orientation": [
+      "按竖版周长重新计算重复单元数量",
+      "保持纹样单元视觉尺度而非等比压缩",
+      "重新分配标题、正文、姓名与签名日期安全区",
+      "竖版标题水平居中并相对 V3 基准上移 1.5 cm"
+    ],
+    "prohibited": [
+      "旋转整体图像",
+      "非等比拉伸或压缩",
+      "裁切边框",
+      "直接扩边",
+      "复制或保留任何源文字"
+    ]
+  },
+  "requires_character_identity": false,
+  "notes": [
+    "示例不包含源模板及成品图片。"
+  ]
+}

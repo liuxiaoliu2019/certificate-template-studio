@@ -1,0 +1,6 @@
+interface:
+  display_name: "证书模板工作室"
+  short_description: "从教材封面或现成模板创建可审批、可复用的横竖版证书"
+  default_prompt: "使用 $certificate-template-studio 开始工作。"
+policy:
+  allow_implicit_invocation: true

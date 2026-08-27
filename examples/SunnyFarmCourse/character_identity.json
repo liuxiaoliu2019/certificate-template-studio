@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "source_cover": "input/cover-not-included.jpg",
+  "policy": {
+    "identity_scope": "all_human_and_animal_characters",
+    "appearance_policy": "optional_but_faithful_when_used",
+    "minimum_score": 85,
+    "max_auto_corrections": 2
+  },
+  "characters": [
+    {
+      "character_id": "boy-explorer",
+      "display_name": "男孩探索者",
+      "category": "human",
+      "source_region": { "x": 0.11, "y": 0.18, "width": 0.35, "height": 0.39 },
+      "traits": {
+        "head_and_face": ["橙红色蓬松侧分短发", "方形深色粗框眼镜", "圆润脸型与雀斑", "大眼睛和宽笑容"],
+        "body_and_proportions": ["低龄儿童卡通比例", "头部明显大于写实比例"],
+        "clothing_or_surface": ["红蓝分区短袖上衣", "深蓝长裤", "红白运动鞋"],
+        "accessories": ["双筒望远镜", "棕色斜挎带"],
+        "palette": ["橙红发色", "深蓝", "鲜红", "暖肤色"],
+        "distinctive_markers": ["粗框眼镜", "雀斑", "双筒望远镜"]
+      },
+      "immutable_traits": ["发型发色", "方形粗框眼镜", "脸型与雀斑", "红蓝服装分区", "儿童身体比例"],
+      "allowed_transformations": ["改变姿势", "改变视线方向", "改变绘制媒介", "从证书边缘探入"],
+      "forbidden_changes": ["摘掉眼镜", "改变发色", "替换服装主色", "改成写实成人比例", "与其他角色混合"],
+      "unverified_traits": [],
+      "reference_crop": "analysis/character_refs/boy-explorer.png"
+    },
+    {
+      "character_id": "girl-explorer",
+      "display_name": "女孩探索者",
+      "category": "human",
+      "source_region": { "x": 0.47, "y": 0.18, "width": 0.31, "height": 0.39 },
+      "traits": {
+        "head_and_face": ["棕红色侧分头发", "低马尾", "圆润脸型与雀斑", "大眼睛和宽笑容"],
+        "body_and_proportions": ["低龄儿童卡通比例", "头部明显大于写实比例"],
+        "clothing_or_surface": ["紫色深浅横条短袖上衣", "深蓝长裤"],
+        "accessories": [],
+        "palette": ["棕红发色", "深紫", "浅紫", "深蓝", "暖肤色"],
+        "distinctive_markers": ["侧分低马尾", "紫色横条上衣", "雀斑"]
+      },
+      "immutable_traits": ["发型发色", "脸型与雀斑", "紫色横条服装", "儿童身体比例"],
+      "allowed_transformations": ["改变姿势", "改变手势", "改变绘制媒介", "从证书边缘探入"],
+      "forbidden_changes": ["改变发型", "替换服装主色与条纹结构", "改成写实成人比例", "与其他角色混合"],
+      "unverified_traits": ["封面下半身局部被标题遮挡"],
+      "reference_crop": "analysis/character_refs/girl-explorer.png"
+    },
+    {
+      "character_id": "sheep-character",
+      "display_name": "绵羊角色",
+      "category": "animal",
+      "source_region": { "x": 0.34, "y": 0.39, "width": 0.27, "height": 0.18 },
+      "traits": {
+        "head_and_face": ["灰色头部", "张嘴笑的卡通表情", "深色鲨鱼造型头饰"],
+        "body_and_proportions": ["圆润奶白色羊毛身体", "夸张直立卡通姿态"],
+        "clothing_or_surface": ["奶白色块状羊毛纹理"],
+        "accessories": ["鲨鱼造型头饰"],
+        "palette": ["奶白", "灰蓝", "深灰"],
+        "distinctive_markers": ["鲨鱼造型头饰", "直立欢笑姿态"]
+      },
+      "immutable_traits": ["绵羊物种", "灰色头部", "奶白羊毛", "鲨鱼造型头饰"],
+      "allowed_transformations": ["改变姿势", "改变朝向", "改变绘制媒介"],
+      "forbidden_changes": ["移除头饰", "改变物种", "改变主要毛色", "与其他动物混合"],
+      "unverified_traits": ["腿部被前景标题遮挡"],
+      "reference_crop": "analysis/character_refs/sheep-character.png"
+    },
+    {
+      "character_id": "rooster-character",
+      "display_name": "公鸡角色",
+      "category": "animal",
+      "source_region": { "x": 0.60, "y": 0.78, "width": 0.39, "height": 0.22 },
+      "traits": {
+        "head_and_face": ["红色高鸡冠", "黄色脸部和橙色喙", "蓝色眼镜"],
+        "body_and_proportions": ["拟人化公鸡比例", "大头和夸张尾羽"],
+        "clothing_or_surface": ["黄色胸部", "深青蓝与绿色尾羽", "红橙翅膀"],
+        "accessories": ["蓝色眼镜", "灰蓝耳机"],
+        "palette": ["鲜红", "黄色", "深青蓝", "绿色", "橙色"],
+        "distinctive_markers": ["蓝色眼镜", "耳机", "高红鸡冠", "深青蓝卷曲尾羽"]
+      },
+      "immutable_traits": ["公鸡物种", "红色高鸡冠", "蓝色眼镜", "耳机", "黄色脸胸与深青蓝尾羽"],
+      "allowed_transformations": ["改变姿势", "改变朝向", "改变绘制媒介", "从角落探入"],
+      "forbidden_changes": ["移除眼镜或耳机", "改变物种", "改变主要羽色", "与其他动物混合"],
+      "unverified_traits": ["脚部位于封面裁切边缘"],
+      "reference_crop": "analysis/character_refs/rooster-character.png"
+    }
+  ],
+  "notes": ["本示例只保存文字身份特征和示意区域，不包含教材封面或裁切图片。"]
+}

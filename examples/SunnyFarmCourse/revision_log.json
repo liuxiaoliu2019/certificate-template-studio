@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "project_id": "sunny-farm-course",
+  "sequence": 1,
+  "active_by_orientation": { "landscape": "r001", "portrait": null },
+  "entries": [
+    {
+      "revision_id": "r001",
+      "orientation": "landscape",
+      "action": "revision",
+      "level": 1,
+      "source": "concepts/landscape_02-not-included.png",
+      "artifact": "revisions/landscape_r001-not-included.png",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "feedback": [
+        "标题缩小约20%",
+        "保持中央留白",
+        "右下减少主要装饰"
+      ],
+      "rollback_to": null,
+      "created_at": "2026-08-25T00:10:00Z"
+    }
+  ]
+}

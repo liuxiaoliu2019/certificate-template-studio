@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "semantic_version": "v3-title",
+  "author": "刘小刘",
+  "license": "CC-BY-4.0",
+  "attribution": "Certificate control maps by 刘小刘, licensed under CC BY 4.0.",
+  "note": "V3 控制图用于装饰密度、留白和区域秩序；成品不得复制灰阶纹理或形状。",
+  "assets": [
+    {
+      "file": "landscape_v3.png",
+      "source_filename": "certificate_control_landscape_v2.png",
+      "width_px": 3508,
+      "height_px": 2480,
+      "sha256": "944fb092d03a452d9d103aaa621dc9573f5e7813eefef8a7f93f7ae7a35d5e64"
+    },
+    {
+      "file": "portrait_v3.png",
+      "source_filename": "certificate_control_portrait_v2.png",
+      "width_px": 2480,
+      "height_px": 3508,
+      "sha256": "af4e7cb99b29559caec479fb4bee23cf6bb5e8518e5457249ad4883aa57ebb6f"
+    }
+  ]
+}

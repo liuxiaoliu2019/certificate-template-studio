@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/template_project_manifest.schema.json",
+  "title": "Bidirectional Certificate Template Project Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "mode", "project_id", "display_name", "created_at", "updated_at", "source_template", "source_orientation", "opposite_orientation", "source_dimensions", "template_dna_path", "current_title", "workflow", "source_lock", "controls", "landscape", "portrait", "master", "derivatives", "approvals", "revision_log_path"],
+  "properties": {
+    "schema_version": { "enum": ["1.0", "1.1"] },
+    "mode": { "const": "template_bidirectional" },
+    "selected_mode": { "const": "template_bidirectional" },
+    "project_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "display_name": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "source_template": { "type": "string", "minLength": 1 },
+    "source_orientation": { "$ref": "#/$defs/orientation" },
+    "opposite_orientation": { "$ref": "#/$defs/orientation" },
+    "source_dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width_px", "height_px"],
+      "properties": {
+        "width_px": { "type": "integer", "minimum": 1 },
+        "height_px": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "template_dna_path": { "const": "analysis/template_dna.json" },
+    "current_title": { "type": ["string", "null"] },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage"],
+      "properties": {
+        "stage": { "enum": ["initialized", "template_analyzed", "waiting_for_title", "title_confirmed", "regenerating_source", "awaiting_source_approval", "source_approved", "deriving_opposite", "awaiting_opposite_approval", "revising", "complete", "deriving_title"] }
+      }
+    },
+    "source_lock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "user_supplied"],
+      "properties": {
+        "status": { "const": "source_locked" },
+        "user_supplied": { "const": true }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landscape", "portrait", "mode"],
+      "properties": {
+        "landscape": { "const": "controls/landscape_v3.png" },
+        "portrait": { "const": "controls/portrait_v3.png" },
+        "mode": { "const": "soft" }
+      }
+    },
+    "landscape": { "$ref": "#/$defs/orientationState" },
+    "portrait": { "$ref": "#/$defs/orientationState" },
+    "master": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landscape", "portrait", "title", "template_dna"],
+      "properties": {
+        "landscape": { "type": ["string", "null"] },
+        "portrait": { "type": ["string", "null"] },
+        "title": { "type": ["string", "null"] },
+        "template_dna": { "type": ["string", "null"] }
+      }
+    },
+    "derivatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "slug", "source_landscape", "source_portrait", "landscape", "portrait", "created_at"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "slug": { "type": "string", "minLength": 1 },
+          "source_landscape": { "type": "string", "minLength": 1 },
+          "source_portrait": { "type": "string", "minLength": 1 },
+          "landscape": { "type": "string", "minLength": 1 },
+          "portrait": { "type": "string", "minLength": 1 },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["orientation", "artifact", "user_confirmation", "approved_at"],
+        "properties": {
+          "orientation": { "$ref": "#/$defs/orientation" },
+          "artifact": { "type": "string", "minLength": 1 },
+          "user_confirmation": { "type": "string", "minLength": 1 },
+          "approved_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "revision_log_path": { "const": "revisions/revision_log.json" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "schema_version": { "const": "1.1" } } },
+      "then": { "required": ["selected_mode"] }
+    },
+    {
+      "if": { "properties": { "source_orientation": { "const": "landscape" } } },
+      "then": { "properties": { "opposite_orientation": { "const": "portrait" } } },
+      "else": { "properties": { "opposite_orientation": { "const": "landscape" } } }
+    }
+  ],
+  "$defs": {
+    "orientation": { "enum": ["landscape", "portrait"] },
+    "orientationState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "concepts", "selected_file", "active_revision_id"],
+      "properties": {
+        "status": { "enum": ["blocked", "ready", "generating", "awaiting_approval", "approved", "revising", "stale"] },
+        "concepts": { "type": "array", "maxItems": 1, "items": { "type": "string" } },
+        "selected_file": { "type": ["string", "null"] },
+        "active_revision_id": { "type": ["string", "null"], "pattern": "^r[0-9]{3,}$" }
+      }
+    }
+  }
+}

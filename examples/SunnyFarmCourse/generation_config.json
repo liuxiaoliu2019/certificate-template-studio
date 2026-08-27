@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.2",
+  "candidate_count": 3,
+  "control_mode": "soft",
+  "control_templates": {
+    "landscape": "controls/landscape_v3.png",
+    "portrait": "controls/portrait_v3.png"
+  },
+  "zone_strengths": {
+    "main_decoration": 80,
+    "secondary_decoration": 50,
+    "transition": 20,
+    "signature_quiet_zone": 12,
+    "body_safe_zone": 8
+  },
+  "title": {
+    "value": "英语之星",
+    "source": "manual_user_input",
+    "only_readable_text": true,
+    "horizontal_center_x_percent": 50,
+    "portrait_up_shift_cm": 1.5,
+    "portrait_up_shift_canvas_percent": 5.05,
+    "forbidden_containers": ["banner", "ribbon", "card", "badge", "frame"]
+  },
+  "outputs": {
+    "landscape": { "width_px": 3508, "height_px": 2480, "dpi": 300 },
+    "portrait": { "width_px": 2480, "height_px": 3508, "dpi": 300 }
+  },
+  "revision_policy": {
+    "preserve_history": true,
+    "allow_rollback": true,
+    "levels": [1, 2, 3]
+  },
+  "identity_policy": {
+    "scope": "all_human_and_animal_characters",
+    "appearance_policy": "optional_but_faithful_when_used",
+    "minimum_score": 85,
+    "max_auto_corrections": 2,
+    "reference_dir": "analysis/character_refs"
+  },
+  "concept_roles": ["cover_character_led", "balanced_translation", "frame_led"],
+  "style_engine": {
+    "enabled": true,
+    "library_size": 7,
+    "recommendation_count": 3,
+    "minimum_compatibility_score": 70,
+    "weights": {
+      "illustration_style": 35,
+      "core_elements": 25,
+      "color_palette": 20,
+      "mood": 15,
+      "composition": 5
+    },
+    "require_distinct_families": true,
+    "minimum_pairwise_parameter_differences": 3
+  },
+  "multi_title_policy": {
+    "reuse_approved_master_by_default": true,
+    "explore_three_only_on_explicit_request": true
+  }
+}
