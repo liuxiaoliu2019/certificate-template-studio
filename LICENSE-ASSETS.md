@@ -17,4 +17,17 @@ Official license summary: <https://creativecommons.org/licenses/by/4.0/>
 
 Official legal code: <https://creativecommons.org/licenses/by/4.0/legalcode>
 
+## Bundled fonts
+
+The font software under `assets/fonts/` is licensed under the SIL Open Font License, Version 1.1. Each font directory contains its upstream `OFL.txt` and `METADATA.pb`. The authoritative family, version, source URL, role and SHA-256 list is `assets/fonts/font_manifest.json`.
+
+Bundled families:
+
+- Noto Serif SC
+- Noto Sans SC
+- Cinzel
+- Baloo 2
+
+The repository MIT License does not replace or alter the OFL terms for these font files.
+
 All other repository content is covered by the repository's MIT License unless a file states otherwise.

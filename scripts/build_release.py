@@ -9,6 +9,8 @@ import re
 import zipfile
 from pathlib import Path
 
+from font_registry import FontRegistry
+
 
 EXCLUDED_PARTS = {".git", "__pycache__", "build", "dist"}
 EXCLUDED_SUFFIXES = {".pyc", ".zip"}
@@ -44,6 +46,7 @@ def main() -> int:
     args = parser.parse_args()
 
     root = args.skill.expanduser().resolve()
+    FontRegistry(root).validate_assets()
     version = skill_version(root)
     output = args.output or root / "dist" / f"certificate-template-studio-v{version}.zip"
     output = output.expanduser().resolve()

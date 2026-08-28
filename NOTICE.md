@@ -18,6 +18,12 @@ Created by 刘小刘 and licensed under CC BY 4.0. See `LICENSE-ASSETS.md`.
 
 These control maps are generation references only. They must not be composited into final certificate artwork or copied as visible grayscale textures or shapes.
 
+## Bundled fonts
+
+Certificate Template Studio redistributes Noto Serif SC, Noto Sans SC, Cinzel and Baloo 2 from the official Google Fonts repository. They are provided under the SIL Open Font License 1.1. The corresponding license and upstream metadata files are kept beside each font under `assets/fonts/`.
+
+See `assets/fonts/font_manifest.json` for immutable SHA-256 hashes and upstream source locations.
+
 ## Third-party content
 
 This repository does not distribute textbook covers, publisher marks, downloaded certificate references, or generated certificate artwork. Example course and project names are fictional.

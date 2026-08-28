@@ -19,6 +19,8 @@ import yaml
 from PIL import Image
 from referencing import Registry, Resource
 
+from font_registry import FontRegistry
+
 
 REQUIRED_PUBLIC_FILES = (
     "README.md",
@@ -234,6 +236,14 @@ def validate_control_assets(root: Path, errors: list[str]) -> None:
         errors.append(f"控制图校验失败：{exc}")
 
 
+def validate_font_assets(root: Path, errors: list[str]) -> None:
+    try:
+        registry = FontRegistry(root)
+        registry.validate_assets()
+    except Exception as exc:
+        errors.append(f"字体资产校验失败：{exc}")
+
+
 def validate_smoke_tests(root: Path, errors: list[str]) -> None:
     quick = run([sys.executable, "scripts/quick_validate.py", str(root)], root)
     if quick.returncode != 0:
@@ -248,16 +258,13 @@ def validate_smoke_tests(root: Path, errors: list[str]) -> None:
         Image.new("RGB", (1055, 1491), "white").save(portrait)
         Image.new("RGB", (900, 900), "white").save(square)
 
-        font_candidates = [
-            Path("C:/Windows/Fonts/arial.ttf"),
-            Path("C:/Windows/Fonts/msyh.ttc"),
-            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-            Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
-            Path("/System/Library/Fonts/PingFang.ttc"),
-        ]
-        test_font = next((path for path in font_candidates if path.is_file()), None)
+        try:
+            test_font = FontRegistry(root).resolve("modern_sans", "CERTIFICATE").path
+        except Exception as exc:
+            test_font = None
+            errors.append(f"找不到用于收尾冒烟测试的内置字体：{exc}")
         if not test_font:
-            errors.append("找不到用于收尾冒烟测试的系统字体")
+            pass
         else:
             final_dir = temp / "finalized"
             final_dir.mkdir()
@@ -612,6 +619,7 @@ def main() -> int:
     validate_formats(root, errors)
     validate_examples(root, errors)
     validate_control_assets(root, errors)
+    validate_font_assets(root, errors)
     validate_smoke_tests(root, errors)
 
     if errors:
