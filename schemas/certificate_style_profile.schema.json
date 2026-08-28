@@ -15,7 +15,7 @@
     "locked_invariants"
   ],
   "properties": {
-    "schema_version": { "enum": ["1.0", "1.1"] },
+    "schema_version": { "enum": ["1.0", "1.1", "1.2"] },
     "profile_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
     "style_family": { "$ref": "#/$defs/styleFamily" },
     "compatibility_score": { "type": "integer", "minimum": 70, "maximum": 100 },
@@ -64,11 +64,12 @@
       "type": "array",
       "uniqueItems": true,
       "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" }
-    }
+    },
+    "title_treatment": { "$ref": "#/$defs/titleTreatment" }
   },
   "allOf": [
     {
-      "if": { "properties": { "schema_version": { "const": "1.1" } } },
+      "if": { "properties": { "schema_version": { "enum": ["1.1", "1.2"] } } },
       "then": {
         "required": ["used_character_ids"],
         "properties": {
@@ -77,6 +78,10 @@
           }
         }
       }
+    },
+    {
+      "if": { "properties": { "schema_version": { "const": "1.2" } } },
+      "then": { "required": ["title_treatment"] }
     }
   ],
   "$defs": {
@@ -89,6 +94,64 @@
         "S05_childrens_flat_education",
         "S06_themed_dynamic_event",
         "S07_chinese_ceremonial_award"
+      ]
+    },
+    "titleTreatment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["render_mode", "font_style_hint", "fill_colors", "outline", "shadow", "noise_allowed"],
+      "properties": {
+        "render_mode": { "enum": ["vector_flat", "vector_effect", "ai_integrated"] },
+        "font_style_hint": { "type": "string", "minLength": 1 },
+        "fill_colors": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^#[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?$" }
+        },
+        "outline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "color", "width_px"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "color": { "type": "string", "pattern": "^#[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?$" },
+            "width_px": { "type": "integer", "minimum": 0, "maximum": 24 }
+          }
+        },
+        "shadow": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "color", "offset_px", "blur_px"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "color": { "type": "string", "pattern": "^#[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?$" },
+            "offset_px": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "type": "integer", "minimum": -64, "maximum": 64 }
+            },
+            "blur_px": { "type": "integer", "minimum": 0, "maximum": 32 }
+          }
+        },
+        "noise_allowed": { "const": false }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "render_mode": { "const": "vector_flat" } } },
+          "then": {
+            "properties": {
+              "fill_colors": { "maxItems": 1 },
+              "shadow": {
+                "properties": {
+                  "enabled": { "const": false },
+                  "offset_px": { "const": [0, 0] },
+                  "blur_px": { "const": 0 }
+                }
+              }
+            }
+          }
+        }
       ]
     }
   }

@@ -18,6 +18,7 @@
 | `concept_role` | `cover_character_led`、`balanced_translation`、`frame_led` |
 | `frame_structure` | `full_frame`、`corner_connected`、`open_frame`、`illustrated_perimeter` |
 | `frame_language` | `classic_double_line`、`european_ornamental`、`modern_geometric`、`botanical_vine`、`storybook_sculpted` |
+| `title_treatment.render_mode` | `vector_flat`、`vector_effect`、`ai_integrated` |
 
 ## 配置原则
 
@@ -29,6 +30,8 @@
 - 默认三套必须各使用一个不同的 `concept_role`；`frame_led` 固定搭配 `full_frame` 和 `textbook_fusion=conservative`，`character_usage` 可以为 `none`。
 - `full_frame` 是沿四边连续的证书结构，不是标题容器；它可在 Z50 侧缘连续，并在 Z80 角部增强，但不得侵入 Z08/Z12 功能区。
 - `cover_character_led` 若使用角色，必须加载角色身份档案与原图裁切；不允许以更换插画媒介为由改变身份。
+- 每个 Profile 必须在生成前确定 `title_treatment`。单色扁平优先 `vector_flat`，规范金属/浮雕优先 `vector_effect`，手绘造型或场景融合优先 `ai_integrated`；不得等生图后再猜测模式。
+- `vector_flat` 只允许一个填充色、可选纯色描边且关闭阴影；`vector_effect` 允许确定性渐变与固定阴影；两者均固定 `noise_allowed=false`。
 
 ## 风格锁
 

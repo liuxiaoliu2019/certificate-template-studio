@@ -244,9 +244,110 @@ def validate_smoke_tests(root: Path, errors: list[str]) -> None:
         landscape = temp / "landscape.png"
         portrait = temp / "portrait.png"
         square = temp / "square.png"
-        Image.new("RGB", (1200, 800), "white").save(landscape)
-        Image.new("RGB", (800, 1200), "white").save(portrait)
+        Image.new("RGB", (1492, 1054), "white").save(landscape)
+        Image.new("RGB", (1055, 1491), "white").save(portrait)
         Image.new("RGB", (900, 900), "white").save(square)
+
+        font_candidates = [
+            Path("C:/Windows/Fonts/arial.ttf"),
+            Path("C:/Windows/Fonts/msyh.ttc"),
+            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+            Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+            Path("/System/Library/Fonts/PingFang.ttc"),
+        ]
+        test_font = next((path for path in font_candidates if path.is_file()), None)
+        if not test_font:
+            errors.append("找不到用于收尾冒烟测试的系统字体")
+        else:
+            final_dir = temp / "finalized"
+            final_dir.mkdir()
+            final_schema = load_json(root / "schemas/finalization_report.schema.json")
+            for orientation, source_image, mode, expected in (
+                ("landscape", landscape, "vector_flat", (2172, 1536)),
+                ("portrait", portrait, "vector_effect", (1536, 2172)),
+            ):
+                output = final_dir / f"{orientation}.png"
+                report_path = final_dir / f"{orientation}.json"
+                command = [
+                    sys.executable,
+                    "scripts/finalize_certificate.py",
+                    "--input",
+                    str(source_image),
+                    "--output",
+                    str(output),
+                    "--report",
+                    str(report_path),
+                    "--orientation",
+                    orientation,
+                    "--title",
+                    "CERTIFICATE",
+                    "--title-mode",
+                    mode,
+                    "--font",
+                    str(test_font),
+                    "--base-text-free",
+                ]
+                if mode == "vector_effect":
+                    command.extend(["--outline-color", "#6B4B12", "--outline-width", "3"])
+                result = run(command, root)
+                if result.returncode != 0:
+                    errors.append(f"{mode} 收尾失败：{result.stderr or result.stdout}")
+                    continue
+                try:
+                    with Image.open(output) as image:
+                        if image.size != expected or image.format != "PNG":
+                            raise ValueError("最终尺寸或格式不正确")
+                    report_data = load_json(report_path)
+                    jsonschema.validate(report_data, final_schema)
+                    if report_data.get("status") != "passed":
+                        raise ValueError("收尾报告未通过")
+                    if report_data.get("title", {}).get("center_error_px", 999) > 1:
+                        raise ValueError("标题没有精确水平居中")
+                    if mode == "vector_flat":
+                        with Image.open(output).convert("RGB") as image:
+                            pure_pixels = sum(
+                                1 for pixel in image.getdata() if pixel == (31, 78, 121)
+                            )
+                        if pure_pixels < 100:
+                            raise ValueError("纯色标题没有保留足够的确定性纯色像素")
+                    else:
+                        duplicate = final_dir / f"{orientation}-duplicate.png"
+                        duplicate_report = final_dir / f"{orientation}-duplicate.json"
+                        duplicate_command = command.copy()
+                        duplicate_command[duplicate_command.index("--output") + 1] = str(duplicate)
+                        duplicate_command[duplicate_command.index("--report") + 1] = str(
+                            duplicate_report
+                        )
+                        duplicate_result = run(duplicate_command, root)
+                        if duplicate_result.returncode != 0 or sha256(duplicate) != sha256(output):
+                            raise ValueError("同一参数的效果标题不能确定性复现")
+                except Exception as exc:
+                    errors.append(f"{mode} 收尾结果无效：{exc}")
+
+            bad_ratio = temp / "bad-ratio.png"
+            Image.new("RGB", (1200, 900), "white").save(bad_ratio)
+            rejected_final = run(
+                [
+                    sys.executable,
+                    "scripts/finalize_certificate.py",
+                    "--input",
+                    str(bad_ratio),
+                    "--output",
+                    str(final_dir / "bad.png"),
+                    "--orientation",
+                    "landscape",
+                    "--title",
+                    "CERTIFICATE",
+                    "--title-mode",
+                    "vector_flat",
+                    "--font",
+                    str(test_font),
+                    "--base-text-free",
+                ],
+                root,
+            )
+            if rejected_final.returncode == 0:
+                errors.append("宽高比误差超过 0.5% 的图片未被收尾脚本拒绝")
 
         textbook_root = temp / "textbook"
         textbook = run(
@@ -307,6 +408,100 @@ def validate_smoke_tests(root: Path, errors: list[str]) -> None:
                     raise ValueError(f"方向识别结果不是 {expected}")
             except Exception as exc:
                 errors.append(f"{label} 模板初始化结果无效：{exc}")
+
+        if test_font:
+            approval_project = temp / "template-landscape" / "template-landscape"
+            if approval_project.is_dir():
+                dna_source = root / "examples/TemplateBidirectional/template_dna.json"
+                dna_target = approval_project / "analysis/template_dna.json"
+                dna_target.write_text(dna_source.read_text(encoding="utf-8"), encoding="utf-8")
+                title_result = run(
+                    [
+                        sys.executable,
+                        "scripts/update_template_manifest.py",
+                        str(approval_project),
+                        "--set-title",
+                        "CERTIFICATE",
+                    ],
+                    root,
+                )
+                master_relative = "selected/master_landscape.png"
+                report_relative = "selected/master_landscape.finalization.json"
+                approval_finalization = run(
+                    [
+                        sys.executable,
+                        "scripts/finalize_certificate.py",
+                        "--input",
+                        str(landscape),
+                        "--output",
+                        str(approval_project / master_relative),
+                        "--report",
+                        str(approval_project / report_relative),
+                        "--project-root",
+                        str(approval_project),
+                        "--orientation",
+                        "landscape",
+                        "--title",
+                        "CERTIFICATE",
+                        "--title-mode",
+                        "vector_flat",
+                        "--font",
+                        str(test_font),
+                        "--base-text-free",
+                    ],
+                    root,
+                )
+                if title_result.returncode != 0 or approval_finalization.returncode != 0:
+                    errors.append(
+                        "模板批准门槛准备失败："
+                        f"{title_result.stderr or approval_finalization.stderr}"
+                    )
+                else:
+                    missing_report = run(
+                        [
+                            sys.executable,
+                            "scripts/update_template_manifest.py",
+                            str(approval_project),
+                            "--approve-orientation",
+                            "landscape",
+                            "--artifact",
+                            master_relative,
+                            "--user-confirmation",
+                            "确认横版定稿",
+                        ],
+                        root,
+                    )
+                    if missing_report.returncode == 0:
+                        errors.append("新版模板项目在没有收尾报告时仍可批准")
+                    approved = run(
+                        [
+                            sys.executable,
+                            "scripts/update_template_manifest.py",
+                            str(approval_project),
+                            "--approve-orientation",
+                            "landscape",
+                            "--artifact",
+                            master_relative,
+                            "--finalization-report",
+                            report_relative,
+                            "--user-confirmation",
+                            "确认横版定稿",
+                        ],
+                        root,
+                    )
+                    if approved.returncode != 0:
+                        errors.append(f"带有效收尾报告的模板批准失败：{approved.stderr}")
+                    else:
+                        approved_manifest = load_json(
+                            approval_project / "configs/template_project_manifest.json"
+                        )
+                        if (
+                            approved_manifest["landscape"].get("finalization_report")
+                            != report_relative
+                            or approved_manifest["approvals"][-1].get("finalization_report")
+                            != report_relative
+                        ):
+                            errors.append("模板批准没有把收尾报告锁入 manifest")
 
         square_root = temp / "template-square"
         rejected = run(

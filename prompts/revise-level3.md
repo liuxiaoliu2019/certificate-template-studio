@@ -7,6 +7,7 @@
 - Style DNA：`{style_dna}`
 - 角色身份档案与可用裁切：`{character_identity_and_refs}`
 - 唯一标题：`{certificate_title}`
+- 标题处理：`{title_treatment}`
 - 被放弃方向：`{rejected_direction}`
 - 用户反馈：`{feedback}`
 - 新方向策略：`{new_direction}`
@@ -22,4 +23,4 @@
 
 LEVEL3 只解除风格家族和构图锁，不解除人物身份锁。若新方向使用教材角色，必须对照完整封面、对应原图裁切与身份档案，保持全部不可改变项；若选择 `frame_led`，必须建立四边连续的 `full_frame`，允许不使用角色。
 
-只生成唯一标题“{certificate_title}”，逐字准确、与画面融合；完整标题外接框中心必须锁定在画布水平中轴 x=50%，竖版标题相对原 V3 基准向上 1.5 cm；禁止其他任何可读或疑似文字，也禁止教材 Logo、标题、出版社与版次信息。
+重新评估或遵守用户指定的 `title_treatment`。`ai_integrated` 只生成逐字准确的“{certificate_title}”；程序标题模式全图无文字并在新底图上重新运行收尾脚本。最终标题中心锁定 x=50%，竖版正式输出上移约 110 px；禁止其他文字及教材 Logo、标题、出版社与版次信息。

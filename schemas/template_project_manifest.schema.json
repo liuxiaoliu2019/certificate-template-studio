@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "mode", "project_id", "display_name", "created_at", "updated_at", "source_template", "source_orientation", "opposite_orientation", "source_dimensions", "template_dna_path", "current_title", "workflow", "source_lock", "controls", "landscape", "portrait", "master", "derivatives", "approvals", "revision_log_path"],
   "properties": {
-    "schema_version": { "enum": ["1.0", "1.1"] },
+    "schema_version": { "enum": ["1.0", "1.1", "1.2"] },
     "mode": { "const": "template_bidirectional" },
     "selected_mode": { "const": "template_bidirectional" },
     "project_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
@@ -27,6 +27,7 @@
     },
     "template_dna_path": { "const": "analysis/template_dna.json" },
     "current_title": { "type": ["string", "null"] },
+    "output_contract": { "$ref": "#/$defs/outputContract" },
     "workflow": {
       "type": "object",
       "additionalProperties": false,
@@ -94,6 +95,7 @@
           "orientation": { "$ref": "#/$defs/orientation" },
           "artifact": { "type": "string", "minLength": 1 },
           "user_confirmation": { "type": "string", "minLength": 1 },
+          "finalization_report": { "type": "string", "minLength": 1 },
           "approved_at": { "type": "string", "format": "date-time" }
         }
       }
@@ -104,6 +106,16 @@
     {
       "if": { "properties": { "schema_version": { "const": "1.1" } } },
       "then": { "required": ["selected_mode"] }
+    },
+    {
+      "if": { "properties": { "schema_version": { "const": "1.2" } } },
+      "then": {
+        "required": ["selected_mode", "output_contract"],
+        "properties": {
+          "landscape": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] },
+          "portrait": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] }
+        }
+      }
     },
     {
       "if": { "properties": { "source_orientation": { "const": "landscape" } } },
@@ -121,7 +133,20 @@
         "status": { "enum": ["blocked", "ready", "generating", "awaiting_approval", "approved", "revising", "stale"] },
         "concepts": { "type": "array", "maxItems": 1, "items": { "type": "string" } },
         "selected_file": { "type": ["string", "null"] },
-        "active_revision_id": { "type": ["string", "null"], "pattern": "^r[0-9]{3,}$" }
+        "active_revision_id": { "type": ["string", "null"], "pattern": "^r[0-9]{3,}$" },
+        "finalization_report": { "type": ["string", "null"] }
+      }
+    },
+    "outputContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["landscape", "portrait", "format", "purpose", "ratio_tolerance_percent"],
+      "properties": {
+        "landscape": { "const": { "width_px": 2172, "height_px": 1536 } },
+        "portrait": { "const": { "width_px": 1536, "height_px": 2172 } },
+        "format": { "const": "PNG" },
+        "purpose": { "const": "mini_program" },
+        "ratio_tolerance_percent": { "const": 0.5 }
       }
     }
   }

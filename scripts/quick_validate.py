@@ -23,6 +23,7 @@ REQUIRED_FILES = [
     "references/style-parameter-rules.md",
     "references/character-identity-lock.md",
     "references/template-bidirectional-workflow.md",
+    "references/output-and-title-rendering.md",
     "schemas/character_identity.schema.json",
     "schemas/certificate_style_profile.schema.json",
     "schemas/style_recommendation.schema.json",
@@ -36,10 +37,13 @@ REQUIRED_FILES = [
     "prompts/analyze-certificate-template.md",
     "prompts/regenerate-source-orientation.md",
     "prompts/derive-opposite-orientation.md",
+    "prompts/generate-title-free-base.md",
     "scripts/extract_character_refs.py",
     "scripts/init_template_project.py",
     "scripts/update_template_manifest.py",
     "scripts/record_template_revision.py",
+    "scripts/finalize_certificate.py",
+    "schemas/finalization_report.schema.json",
     "assets/controls/landscape_v3.png",
     "assets/controls/portrait_v3.png",
     "examples/TemplateBidirectional/template_dna.json",
@@ -62,7 +66,7 @@ def validate_profile(profile: dict, families: set[str], allowed: dict[str, set[s
     for key, values in allowed.items():
         if key in params and params.get(key) not in values:
             raise ValueError(f"Style Profile 参数无效：{key}={params.get(key)}")
-    if profile.get("schema_version") == "1.1":
+    if profile.get("schema_version") in {"1.1", "1.2"}:
         required_new = {"concept_role", "frame_structure", "frame_language"}
         missing = required_new - params.keys()
         if missing:
@@ -72,6 +76,19 @@ def validate_profile(profile: dict, families: set[str], allowed: dict[str, set[s
         if params["concept_role"] == "frame_led":
             if params["frame_structure"] != "full_frame" or params["textbook_fusion"] != "conservative":
                 raise ValueError("frame_led 必须使用 full_frame 与 conservative 教材融合")
+    if profile.get("schema_version") == "1.2":
+        treatment = profile.get("title_treatment", {})
+        mode = treatment.get("render_mode")
+        if mode not in {"vector_flat", "vector_effect", "ai_integrated"}:
+            raise ValueError("v1.2 Style Profile 缺少有效 title_treatment")
+        if treatment.get("noise_allowed") is not False:
+            raise ValueError("title_treatment 必须固定 noise_allowed=false")
+        if mode == "vector_flat":
+            if len(treatment.get("fill_colors", [])) != 1:
+                raise ValueError("vector_flat 必须只有一个填充色")
+            shadow = treatment.get("shadow", {})
+            if shadow.get("enabled") is not False or shadow.get("offset_px") != [0, 0] or shadow.get("blur_px") != 0:
+                raise ValueError("vector_flat 必须关闭阴影")
 
 
 def validate_recommendation(path: Path, families: set[str], allowed: dict[str, set[str]]) -> None:
@@ -110,8 +127,8 @@ def validate_recommendation(path: Path, families: set[str], allowed: dict[str, s
         by_id[profile["profile_id"]] = profile
 
     versions = {profile.get("schema_version") for profile in profiles}
-    if "1.1" in versions:
-        if versions != {"1.1"}:
+    if versions & {"1.1", "1.2"}:
+        if len(versions) != 1:
             raise ValueError(f"同一推荐文件不可混用新旧 Profile：{path}")
         roles = {profile["parameters"]["concept_role"] for profile in profiles}
         expected_roles = {"cover_character_led", "balanced_translation", "frame_led"}
@@ -197,8 +214,8 @@ def main() -> int:
         text = skill_path.read_text(encoding="utf-8")
         if not re.search(r"^name:\s*certificate-template-studio\s*$", text, re.MULTILINE):
             errors.append("SKILL.md name 不正确")
-        if not re.search(r'version:\s*"1\.5\.1"', text):
-            errors.append("SKILL.md 版本不是 1.5.1")
+        if not re.search(r'version:\s*"1\.6\.0"', text):
+            errors.append("SKILL.md 版本不是 1.6.0")
         if text.count(MODE_MENU) != 1:
             errors.append("SKILL.md 缺少固定模式菜单或菜单文案发生变化")
         for invariant in (
@@ -262,6 +279,14 @@ def main() -> int:
             raise ValueError("教材初始化脚本未写入 selected_mode")
         if '"selected_mode": "template_bidirectional"' not in template_init:
             raise ValueError("模板初始化脚本未写入 selected_mode")
+        generation = load_json(root / "examples" / "SunnyFarmCourse" / "generation_config.json")
+        if generation.get("schema_version") != "1.3":
+            raise ValueError("示例 generation_config 不是 v1.3")
+        if generation.get("outputs") != {
+            "landscape": {"width_px": 2172, "height_px": 1536, "format": "PNG", "purpose": "mini_program"},
+            "portrait": {"width_px": 1536, "height_px": 2172, "format": "PNG", "purpose": "mini_program"},
+        }:
+            raise ValueError("小程序输出合同不正确")
     except Exception as exc:
         errors.append(f"模式菜单状态不变量失败：{exc}")
 
@@ -270,7 +295,7 @@ def main() -> int:
             print(f"FAIL: {item}", file=sys.stderr)
         return 1
     recommendation_count = len(list((root / "examples").rglob("style_recommendation.json")))
-    print(f"PASS: certificate-template-studio v1.5.1；强制模式菜单；教材角色身份锁；模板双向审批锁；7 个风格家族；{recommendation_count} 组推荐测试。")
+    print(f"PASS: certificate-template-studio v1.6.0；固定小程序尺寸；三模式标题；强制模式菜单；角色身份锁；模板双向审批锁；7 个风格家族；{recommendation_count} 组推荐测试。")
     return 0
 
 

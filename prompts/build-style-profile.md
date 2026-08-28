@@ -14,10 +14,12 @@
 
 根据指定风格家族和教材 Style DNA，创建一份可用于横版、修改和竖版继承的 Style Profile。
 
+使用 schema v1.2，并先建立 `title_treatment`。单色扁平使用 `vector_flat`；规范金属、金色渐变或浮雕使用 `vector_effect`；手绘造型或与场景交织使用 `ai_integrated`。程序模式固定 `noise_allowed=false`，其中 `vector_flat` 只有一个填充色且关闭阴影。
+
 只从 `references/style-parameter-rules.md` 的有限枚举中取值，并优先使用风格库为当前家族列出的常用参数。若偏离常用子集，必须在 `adaptation_notes` 中说明教材证据和必要性。
 
 `style_strategy` 要明确说明：教材核心元素如何转译、边框或外围如何组织、左右下角如何形成可见锚点、两侧如何以由大到小的元素弱连接、中央和落款功能区如何退让。若使用角色，列出 `used_character_ids`，并锁定对应身份档案与原图裁切。
 
 `concept_role=frame_led` 时固定使用 `frame_structure=full_frame`、`textbook_fusion=conservative`；完整边框沿四边连续，以角部强化，不得退化成零散角花。角色可以为 `none`。其他设计角色按内容选择 `corner_connected`、`open_frame` 或 `illustrated_perimeter`。
 
-`locked_invariants` 至少包括唯一标题、标题水平居中、中央变量安全区、控制图不进入成品、当前风格身份；含角色时另包含人物身份锁。只返回符合 schema 的 JSON。
+`locked_invariants` 至少包括唯一标题、标题水平居中、标题处理模式、固定小程序输出尺寸、中央变量安全区、控制图不进入成品、当前风格身份；含角色时另包含人物身份锁。只返回符合 schema 的 JSON。

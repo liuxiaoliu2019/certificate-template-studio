@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/finalization_report.schema.json",
+  "title": "Certificate Finalization Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "orientation",
+    "title_render_mode",
+    "input",
+    "output",
+    "crop",
+    "title",
+    "checks",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "status": { "enum": ["passed", "failed"] },
+    "orientation": { "enum": ["landscape", "portrait"] },
+    "title_render_mode": { "enum": ["vector_flat", "vector_effect", "ai_integrated"] },
+    "input": { "$ref": "#/$defs/imageRecord" },
+    "output": {
+      "allOf": [
+        { "$ref": "#/$defs/imageRecord" },
+        {
+          "type": "object",
+          "required": ["sha256"],
+          "properties": { "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+        }
+      ]
+    },
+    "ratio_error_percent": { "type": "number", "minimum": 0, "maximum": 0.5 },
+    "crop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["left", "top", "right", "bottom"],
+      "properties": {
+        "left": { "type": "integer", "minimum": 0 },
+        "top": { "type": "integer", "minimum": 0 },
+        "right": { "type": "integer", "minimum": 1 },
+        "bottom": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "title": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "font_path", "bbox", "center_error_px", "portrait_up_shift_px"],
+      "properties": {
+        "value": { "type": "string", "minLength": 1 },
+        "font_path": { "type": ["string", "null"] },
+        "bbox": {
+          "type": ["array", "null"],
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "type": "integer" }
+        },
+        "center_error_px": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "portrait_up_shift_px": { "type": "integer", "enum": [0, 110] }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ratio", "dimensions", "png", "no_stretch", "base_text_free", "title_validated", "color_policy"],
+      "properties": {
+        "ratio": { "const": true },
+        "dimensions": { "const": true },
+        "png": { "const": true },
+        "no_stretch": { "const": true },
+        "base_text_free": { "type": ["boolean", "null"] },
+        "title_validated": { "const": true },
+        "color_policy": { "enum": ["flat_deterministic", "effect_deterministic", "visual_review"] }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "imageRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "width_px", "height_px", "format"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "width_px": { "type": "integer", "minimum": 1 },
+        "height_px": { "type": "integer", "minimum": 1 },
+        "format": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    }
+  }
+}

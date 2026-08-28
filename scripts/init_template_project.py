@@ -95,16 +95,18 @@ def main() -> int:
             "concepts": [],
             "selected_file": None,
             "active_revision_id": None,
+            "finalization_report": None,
         },
         "portrait": {
             "status": "ready" if orientation == "portrait" else "blocked",
             "concepts": [],
             "selected_file": None,
             "active_revision_id": None,
+            "finalization_report": None,
         },
     }
     manifest = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": "template_bidirectional",
         "selected_mode": "template_bidirectional",
         "project_id": project_id,
@@ -117,6 +119,13 @@ def main() -> int:
         "source_dimensions": {"width_px": width, "height_px": height},
         "template_dna_path": "analysis/template_dna.json",
         "current_title": None,
+        "output_contract": {
+            "landscape": {"width_px": 2172, "height_px": 1536},
+            "portrait": {"width_px": 1536, "height_px": 2172},
+            "format": "PNG",
+            "purpose": "mini_program",
+            "ratio_tolerance_percent": 0.5,
+        },
         "workflow": {"stage": "initialized"},
         "source_lock": {"status": "source_locked", "user_supplied": True},
         "controls": {

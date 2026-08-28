@@ -1,11 +1,11 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "textbook_key": "SunnyFarmCourse",
   "source_style_dna": "analysis/style_dna.json",
   "source_character_identity": "analysis/character_identity.json",
   "used_character_ids": ["boy-explorer", "girl-explorer"],
   "approved_style_profile": {
-    "schema_version": "1.1",
+    "schema_version": "1.2",
     "profile_id": "sunny-farm-s05",
     "style_family": "S05_childrens_flat_education",
     "compatibility_score": 95,
@@ -13,7 +13,15 @@
     "parameters": { "density": "medium", "symmetry": "balanced_asymmetric", "illustration_medium": "flat", "ceremony_level": "light", "textbook_fusion": "prominent", "character_usage": "corner_character", "background_material": "geometric_field", "corner_connection": "tapered_continuous", "title_position": "canvas_center", "concept_role": "cover_character_led", "frame_structure": "illustrated_perimeter", "frame_language": "storybook_sculpted" },
     "style_strategy": "左右角以角色和田园物件形成锚点，底边以变小草叶和花朵弱连接，中央暖白退让。",
     "locked_invariants": ["唯一标题", "标题水平居中", "中央变量安全区", "控制图不进入成品", "人物身份锁"],
-    "used_character_ids": ["boy-explorer", "girl-explorer"]
+    "used_character_ids": ["boy-explorer", "girl-explorer"],
+    "title_treatment": {
+      "render_mode": "vector_flat",
+      "font_style_hint": "rounded_display_bold",
+      "fill_colors": ["#1F7A4D"],
+      "outline": { "enabled": true, "color": "#FFFFFF", "width_px": 4 },
+      "shadow": { "enabled": false, "color": "#000000", "offset_px": [0, 0], "blur_px": 0 },
+      "noise_allowed": false
+    }
   },
   "master_title": "英语之星",
   "masters": { "landscape": "selected/master-landscape-not-included.png", "portrait": "portrait/master-portrait-not-included.png" },

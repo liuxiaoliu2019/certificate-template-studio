@@ -12,6 +12,9 @@ It supports two modes: creating a certificate system from a textbook cover, or f
 - Character identity locks for facial features, hair, clothing, accessories, species, and proportions.
 - Three genuinely different landscape concepts in textbook mode, including a full-frame option.
 - Fresh composition for each orientation—never rotate, stretch, crop, or mechanically extend an image.
+- Exact mini-program PNG output: `2172 × 1536 px` landscape and `1536 × 2172 px` portrait.
+- Three title modes: deterministic flat color, deterministic styled effects, or validated AI-integrated lettering.
+- A finalization report gate covering dimensions, ratio handling, title centering, artifact hash, and title validation.
 - Separate user approval for landscape and portrait masters.
 - LEVEL1/2/3 revisions with non-destructive history and rollback.
 - Structured Style DNA, Template DNA, manifests, revision logs, and JSON Schemas.
@@ -61,7 +64,7 @@ Release archives are available from [GitHub Releases](https://github.com/liuxiao
 
 - Codex Desktop or another Codex environment that supports local skills.
 - Python 3.10+.
-- Pillow for image dimensions, orientation detection, and character reference crops.
+- Pillow for image dimensions, orientation detection, character reference crops, exact-size finalization, and deterministic title rendering.
 - A host with image-input and image-generation capability for final artwork.
 
 Install development dependencies with:
@@ -76,6 +79,8 @@ python -m pip install -r requirements-dev.txt
 python scripts/quick_validate.py .
 python scripts/public_release_validate.py .
 ```
+
+The public validator also checks the exact output dimensions, title modes, finalization reports, example schemas, control-map hashes, and release-safety rules.
 
 ## Licensing
 

@@ -5,7 +5,12 @@ import argparse
 import sys
 from pathlib import Path
 
-from _common import load_json, parse_assignment, project_file, save_json, set_dotted, utc_now
+from _common import load_json, parse_assignment, project_file, save_json, set_dotted, sha256_file, utc_now
+
+try:
+    from PIL import Image
+except ImportError as exc:  # pragma: no cover - depends on local runtime
+    raise SystemExit("缺少 Pillow。请先安装 Pillow。") from exc
 
 
 STYLE_FAMILIES = {
@@ -63,6 +68,7 @@ def parse_args() -> argparse.Namespace:
     action.add_argument("--invalidate-landscape", action="store_true")
     parser.add_argument("--style-profile", metavar="RELATIVE_PATH", help="选择或批准横版时绑定的 Style Profile")
     parser.add_argument("--user-confirmation", help="审批时保存用户明确确认的原话")
+    parser.add_argument("--finalization-report", metavar="RELATIVE_PATH", help="批准时绑定通过的收尾报告")
     parser.add_argument("--reason", help="使已批准横版失效时的原因")
     return parser.parse_args()
 
@@ -84,6 +90,35 @@ def checked_profile(project: Path, relative: str) -> tuple[str, dict]:
     if family not in STYLE_FAMILIES or not isinstance(score, int) or score < 70:
         raise ValueError("Style Profile 的家族或兼容性分数不合格")
     return path.relative_to(project.resolve()).as_posix(), profile
+
+
+def checked_finalization_report(project: Path, relative: str | None, artifact: str, orientation: str) -> str:
+    if not relative:
+        raise ValueError("新版项目批准 Master 时必须提供 --finalization-report")
+    report_path = project_file(project, relative)
+    if not report_path.is_file():
+        raise FileNotFoundError(f"项目内找不到收尾报告：{relative}")
+    report = load_json(report_path)
+    if report.get("status") != "passed" or report.get("orientation") != orientation:
+        raise ValueError("收尾报告未通过或方向不匹配")
+    expected = {"landscape": (2172, 1536), "portrait": (1536, 2172)}[orientation]
+    output = report.get("output", {})
+    if (output.get("width_px"), output.get("height_px")) != expected or output.get("format") != "PNG":
+        raise ValueError("收尾报告的输出尺寸或格式不合格")
+    artifact_path = project_file(project, artifact)
+    reported_path = Path(str(output.get("path", "")))
+    if reported_path.is_absolute():
+        matches = reported_path.resolve() == artifact_path.resolve()
+    else:
+        matches = project_file(project, reported_path.as_posix()).resolve() == artifact_path.resolve()
+    if not matches:
+        raise ValueError("收尾报告引用的成品与待批准成品不一致")
+    with Image.open(artifact_path) as image:
+        if image.size != expected or image.format != "PNG":
+            raise ValueError("待批准成品的实际尺寸或格式不合格")
+    if output.get("sha256") != sha256_file(artifact_path):
+        raise ValueError("待批准成品与收尾报告哈希不一致")
+    return report_path.relative_to(project.resolve()).as_posix()
 
 
 def register_recommendation(manifest: dict, project: Path, relative: str) -> None:
@@ -133,7 +168,7 @@ def write_master_profile(manifest: dict, project: Path, profile: dict) -> None:
     if target.is_file():
         created_at = load_json(target).get("created_at", now)
     payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.2" if profile.get("schema_version") == "1.2" else "1.0",
         "textbook_key": manifest["textbook_key"],
         "source_style_dna": manifest["style_dna_path"],
         "approved_style_profile": profile,
@@ -156,6 +191,9 @@ def write_master_profile(manifest: dict, project: Path, profile: dict) -> None:
         "created_at": created_at,
         "updated_at": now,
     }
+    if payload["schema_version"] == "1.2":
+        payload["source_character_identity"] = manifest.get("character_identity_path")
+        payload["used_character_ids"] = profile.get("used_character_ids", [])
     save_json(target, payload)
     manifest["style_engine"]["master_profile_path"] = target.relative_to(project).as_posix()
 
@@ -167,11 +205,15 @@ def approve(
     relative: str,
     words: str | None,
     style_profile: str | None,
+    finalization_report: str | None,
 ) -> None:
     if not approval_words_valid(orientation, words):
         label = "横版定稿" if orientation == "landscape" else "竖版定稿"
         raise ValueError(f"审批原话必须明确包含“{label}”")
     artifact = checked_artifact(project, relative)
+    report_path = None
+    if manifest.get("schema_version") == "1.4" or finalization_report:
+        report_path = checked_finalization_report(project, finalization_report, artifact, orientation)
     if orientation == "portrait" and manifest["landscape"]["status"] != "approved":
         raise ValueError("横版未批准，不能批准竖版")
 
@@ -200,18 +242,21 @@ def approve(
     state = manifest[orientation]
     state["status"] = "approved"
     state["selected_file"] = artifact
+    if "finalization_report" in state:
+        state["finalization_report"] = report_path
     manifest["master"][orientation] = artifact
     manifest["master"]["title"] = manifest.get("current_title")
     if profile_path:
         manifest["master"]["style_profile"] = profile_path
-    manifest["approvals"].append(
-        {
+    approval = {
             "orientation": orientation,
             "artifact": artifact,
             "user_confirmation": words.strip(),
             "approved_at": now,
         }
-    )
+    if report_path:
+        approval["finalization_report"] = report_path
+    manifest["approvals"].append(approval)
     if orientation == "landscape":
         manifest["portrait"]["status"] = "ready"
         manifest["workflow"]["stage"] = "landscape_approved"
@@ -282,9 +327,9 @@ def main() -> int:
         manifest["portrait"]["status"] = "awaiting_approval"
         manifest["workflow"]["stage"] = "awaiting_portrait_approval"
     elif args.approve_landscape:
-        approve(manifest, project, "landscape", args.approve_landscape, args.user_confirmation, args.style_profile)
+        approve(manifest, project, "landscape", args.approve_landscape, args.user_confirmation, args.style_profile, args.finalization_report)
     elif args.approve_portrait:
-        approve(manifest, project, "portrait", args.approve_portrait, args.user_confirmation, None)
+        approve(manifest, project, "portrait", args.approve_portrait, args.user_confirmation, None, args.finalization_report)
     elif args.invalidate_landscape:
         if not args.reason or not args.reason.strip():
             raise ValueError("使横版失效时必须提供 --reason")

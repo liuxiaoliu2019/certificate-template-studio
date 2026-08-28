@@ -5,6 +5,8 @@
 - `certificate_control_landscape_v2.png`：A4 横版，3508 × 2480 px，300 DPI。
 - `certificate_control_portrait_v2.png`：A4 竖版，2480 × 3508 px，300 DPI。
 
+这些是历史控制图的资产尺寸，不代表当前成品交付尺寸；当前输出合同以 `references/output-and-title-rendering.md` 为准。
+
 ## 使用方式
 
 每次将对应方向的灰阶图与教材封面一同作为生成参考。教材封面负责视觉风格；本图只约束装饰密度和排版空间。

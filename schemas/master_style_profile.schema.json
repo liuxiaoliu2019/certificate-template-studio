@@ -17,7 +17,7 @@
     "updated_at"
   ],
   "properties": {
-    "schema_version": { "enum": ["1.0", "1.1"] },
+    "schema_version": { "enum": ["1.0", "1.1", "1.2"] },
     "textbook_key": { "type": "string", "minLength": 1 },
     "source_style_dna": { "type": "string", "minLength": 1 },
     "source_character_identity": { "type": ["string", "null"] },
@@ -58,7 +58,7 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "schema_version": { "const": "1.1" } } },
+      "if": { "properties": { "schema_version": { "enum": ["1.1", "1.2"] } } },
       "then": { "required": ["source_character_identity", "used_character_ids"] }
     }
   ]

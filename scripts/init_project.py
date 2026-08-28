@@ -67,7 +67,7 @@ def main() -> int:
 
     now = utc_now()
     generation_config = {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "candidate_count": 3,
         "control_mode": "soft",
         "control_templates": {
@@ -88,11 +88,14 @@ def main() -> int:
             "horizontal_center_x_percent": 50,
             "portrait_up_shift_cm": 1.5,
             "portrait_up_shift_canvas_percent": 5.05,
+            "portrait_up_shift_output_px": 110,
+            "render_mode": "auto",
+            "allowed_render_modes": ["vector_flat", "vector_effect", "ai_integrated"],
             "forbidden_containers": ["banner", "ribbon", "card", "badge", "title_frame"],
         },
         "outputs": {
-            "landscape": {"width_px": 3508, "height_px": 2480, "dpi": 300},
-            "portrait": {"width_px": 2480, "height_px": 3508, "dpi": 300},
+            "landscape": {"width_px": 2172, "height_px": 1536, "format": "PNG", "purpose": "mini_program"},
+            "portrait": {"width_px": 1536, "height_px": 2172, "format": "PNG", "purpose": "mini_program"},
         },
         "revision_policy": {
             "preserve_history": True,
@@ -128,7 +131,7 @@ def main() -> int:
         },
     }
     manifest = {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "selected_mode": "textbook_cover",
         "project_id": project_id,
         "textbook_key": args.name,
@@ -139,6 +142,13 @@ def main() -> int:
         "character_identity_path": "analysis/character_identity.json",
         "character_reference_dir": "analysis/character_refs",
         "current_title": None,
+        "output_contract": {
+            "landscape": {"width_px": 2172, "height_px": 1536},
+            "portrait": {"width_px": 1536, "height_px": 2172},
+            "format": "PNG",
+            "purpose": "mini_program",
+            "ratio_tolerance_percent": 0.5,
+        },
         "workflow": {"stage": "initialized"},
         "controls": {
             "landscape": "controls/landscape_v3.png",
@@ -151,12 +161,14 @@ def main() -> int:
             "concepts": [],
             "selected_file": None,
             "active_revision_id": None,
+            "finalization_report": None,
         },
         "portrait": {
             "status": "blocked",
             "concepts": [],
             "selected_file": None,
             "active_revision_id": None,
+            "finalization_report": None,
         },
         "style_engine": {
             "status": "not_started",

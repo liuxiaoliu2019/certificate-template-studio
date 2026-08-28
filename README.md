@@ -12,6 +12,9 @@
 - **角色身份锁**：允许姿势和绘制媒介变化，保持脸部、发型、服装、配件及物种特征。
 - **三方向探索**：教材模式自动提出三种真正不同的横版方向，其中包含完整边框方案。
 - **横竖重新构图**：目标方向不是旋转、拉伸、裁切或机械扩边。
+- **固定小程序尺寸**：横版强制输出 `2172 × 1536 px`，竖版强制输出 `1536 × 2172 px`，统一为 PNG。
+- **三种标题渲染**：纯色扁平、可控立体效果与 AI 融合标题按风格自动选择，也可由用户覆盖。
+- **定稿硬校验**：最终尺寸、比例、标题居中、文件哈希和标题验证写入报告；报告未通过不能批准 Master。
 - **明确审批**：只有用户明确确认定稿，状态才会进入下一阶段。
 - **非破坏性修订**：LEVEL1/2/3 修改、历史记录与回退。
 - **双 Master 复用**：同一教材或模板更换标题时，默认复用已经批准的横竖版。
@@ -37,10 +40,12 @@ flowchart LR
     B --> C[用户输入标题]
     C --> D[三套横版方向]
     D --> E[选择与修改]
-    E --> F{确认横版定稿}
-    F --> G[竖版重新构图]
-    G --> H{确认竖版定稿}
-    H --> I[横竖 Master]
+    E --> F[最终尺寸与标题渲染]
+    F --> G{确认横版定稿}
+    G --> H[竖版重新构图]
+    H --> I[最终尺寸与标题渲染]
+    I --> J{确认竖版定稿}
+    J --> K[横竖 Master]
 ```
 
 ### 2｜现成模板双向转换
@@ -50,10 +55,12 @@ flowchart LR
     A[横版或竖版模板] --> B[Template DNA]
     B --> C[用户输入标题]
     C --> D[重制源方向]
-    D --> E{确认源方向定稿}
-    E --> F[重新构图另一方向]
-    F --> G{确认另一方向定稿}
-    G --> H[横竖 Master]
+    D --> E[最终尺寸与标题渲染]
+    E --> F{确认源方向定稿}
+    F --> G[重新构图另一方向]
+    G --> H[最终尺寸与标题渲染]
+    H --> I{确认另一方向定稿}
+    I --> J[横竖 Master]
 ```
 
 ## 安装
@@ -92,7 +99,7 @@ git clone https://github.com/liuxiaoliu2019/certificate-template-studio.git `
 
 ### 方法三：GitHub Release
 
-从 [Releases](https://github.com/liuxiaoliu2019/certificate-template-studio/releases) 下载 `certificate-template-studio-v1.5.1.zip`，解压到用户的 `.codex/skills/certificate-template-studio` 目录。
+从 [Releases](https://github.com/liuxiaoliu2019/certificate-template-studio/releases) 下载最新的版本压缩包，解压到用户的 `.codex/skills/certificate-template-studio` 目录。
 
 安装后建议重启 Codex 或新建任务。
 
@@ -110,7 +117,7 @@ git clone https://github.com/liuxiaoliu2019/certificate-template-studio.git `
 
 - Codex 桌面端或其他支持本地 Skills 的 Codex 环境。
 - Python 3.10 或更高版本。
-- Pillow：项目初始化时读取图片尺寸、方向和角色裁切。
+- Pillow：读取图片尺寸与方向、角色裁切、最终尺寸处理和确定性标题渲染。
 - 能够接收参考图并生成图片的宿主能力。若当前环境没有图像生成能力，Skill 仍可完成分析、配置和 prompts，但不会伪称图片已生成。
 
 开发与验证依赖可通过以下命令安装：
@@ -126,7 +133,7 @@ python -m pip install -r requirements-dev.txt
 - `references/`：设计、标题、身份锁、审批、修改和评分规则。
 - `prompts/`：各阶段可按需加载的提示词。
 - `schemas/`：项目配置和状态记录的 JSON Schema。
-- `scripts/`：初始化、状态更新、修订记录、回退和验证工具。
+- `scripts/`：初始化、最终图片处理、状态更新、修订记录、回退和验证工具。
 - `examples/`：不含真实教材或成品图片的虚构文本/JSON 示例。
 
 ## 验证
@@ -136,7 +143,7 @@ python scripts/quick_validate.py .
 python scripts/public_release_validate.py .
 ```
 
-第二个命令还会检查示例 Schema、控制图哈希、方向识别、公开安全规则和禁止文件。
+第二个命令还会检查示例 Schema、控制图哈希、方向识别、固定输出尺寸、三种标题模式、最终报告、公开安全规则和禁止文件。
 
 ## 许可证
 

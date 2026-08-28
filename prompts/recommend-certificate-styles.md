@@ -22,6 +22,8 @@
 
 选择三个不同的风格家族，并为每个候选建立完整 Style Profile。三个 Profile 必须分别使用 `cover_character_led`、`balanced_translation`、`frame_led`。默认第 3 个为 `frame_led + full_frame + textbook_fusion=conservative`，可不使用角色；它的教材兼容主要通过配色、年龄感、气质和少量主题符号判断，不以封面人物数量判断。前两个 Profile 不得同时都使用 `full_frame`。
 
-任意两个 Profile 至少有三个核心参数不同；差异不能仅来自颜色、字体或小装饰。含角色候选必须在策略中列出实际使用的 `character_id`，并声明加载对应原图裁切与身份锁。标题长度只影响后续排版，不影响兼容性分数。
+每个 Profile 使用 schema v1.2，并根据风格意图建立 `title_treatment`：单色扁平优先 `vector_flat`，规范金属/浮雕优先 `vector_effect`，手绘造型或场景融合优先 `ai_integrated`。三种模式不是强制各出现一次，必须服从真实风格设计。
+
+任意两个 Profile 至少有三个核心参数不同；差异不能仅来自颜色、字体、标题模式或小装饰。含角色候选必须在策略中列出实际使用的 `character_id`，并声明加载对应原图裁切与身份锁。标题长度只影响后续排版，不影响兼容性分数。
 
 只返回符合 schema 的 JSON。三套候选不得生成图片，先完成评分、设计角色、边框结构、策略和差异检查。
