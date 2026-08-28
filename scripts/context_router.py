@@ -7,6 +7,7 @@ from typing import Any
 
 from _common import save_json, utc_now
 from schema_runtime import validate_document
+from metrics import MetricsRecorder
 
 
 STAGE_BUDGETS = {
@@ -174,6 +175,7 @@ def main() -> int:
     parser.add_argument("--resource", action="append", type=_parse_resource, default=[])
     parser.add_argument("--used-character-id", action="append", default=[])
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--metrics", type=Path)
     args = parser.parse_args()
     context = build_active_context(
         args.stage,
@@ -182,6 +184,17 @@ def main() -> int:
         used_character_ids=set(args.used_character_id),
     )
     save_json(args.output.expanduser().resolve(), context)
+    if args.metrics:
+        recorder = MetricsRecorder(args.metrics)
+        recorder.increment("context_builds", stage=args.stage, path=str(args.output))
+        reference_count = sum(1 for item in context["resources"] if item["kind"] == "reference")
+        image_count = sum(1 for item in context["resources"] if item["kind"] == "image")
+        if reference_count:
+            recorder.increment("references_loaded", reference_count, stage=args.stage)
+        if context["text_chars_used"]:
+            recorder.increment("prompt_chars", context["text_chars_used"], stage=args.stage)
+        if image_count:
+            recorder.increment("image_inputs", image_count, stage=args.stage)
     print(args.output.expanduser().resolve())
     return 0
 

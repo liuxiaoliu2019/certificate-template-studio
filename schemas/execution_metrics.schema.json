@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/certificate-template-studio/execution_metrics.schema.json",
+  "title": "Workflow execution metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "counters", "events", "updated_at"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "analysis_calls", "planning_calls", "three_concept_generations", "image_generation_calls",
+        "visual_review_calls", "auto_repair_calls", "cache_hits", "cache_misses",
+        "context_builds", "references_loaded", "prompt_chars", "image_inputs",
+        "user_pauses", "title_derivatives"
+      ],
+      "properties": {
+        "analysis_calls": {"$ref": "#/$defs/count"},
+        "planning_calls": {"$ref": "#/$defs/count"},
+        "three_concept_generations": {"$ref": "#/$defs/count"},
+        "image_generation_calls": {"$ref": "#/$defs/count"},
+        "visual_review_calls": {"$ref": "#/$defs/count"},
+        "auto_repair_calls": {"$ref": "#/$defs/count"},
+        "cache_hits": {"$ref": "#/$defs/count"},
+        "cache_misses": {"$ref": "#/$defs/count"},
+        "context_builds": {"$ref": "#/$defs/count"},
+        "references_loaded": {"$ref": "#/$defs/count"},
+        "prompt_chars": {"$ref": "#/$defs/count"},
+        "image_inputs": {"$ref": "#/$defs/count"},
+        "user_pauses": {"$ref": "#/$defs/count"},
+        "title_derivatives": {"$ref": "#/$defs/count"}
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["counter", "count", "at"],
+        "properties": {
+          "counter": {"type": "string", "minLength": 1},
+          "count": {"type": "integer", "minimum": 1},
+          "stage": {"type": ["string", "null"]},
+          "orientation": {"type": ["string", "null"], "enum": ["landscape", "portrait", null]},
+          "path": {"type": ["string", "null"]},
+          "token_count": {"type": ["integer", "null"], "minimum": 0},
+          "at": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {"count": {"type": "integer", "minimum": 0}}
+}

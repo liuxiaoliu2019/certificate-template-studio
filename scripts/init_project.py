@@ -8,6 +8,7 @@ from pathlib import Path
 
 from _common import safe_slug, save_json, utc_now
 from cache_engine import build_source_fingerprint
+from metrics import new_metrics
 
 
 PROJECT_DIRS = [
@@ -205,6 +206,7 @@ def main() -> int:
         ),
     )
     save_json(project / "configs" / "cache_state.json", {"schema_version": "1.0", "entries": {}})
+    save_json(project / "logs" / "execution_metrics.json", new_metrics())
     save_json(project / "revisions" / "revision_log.json", revision_log)
     (project / "logs" / "run_log.md").write_text(
         f"# Run Log\n\n- {now} 项目初始化；等待 Style DNA 分析、用户标题与风格推荐。\n", encoding="utf-8"

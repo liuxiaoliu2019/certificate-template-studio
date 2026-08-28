@@ -6,6 +6,7 @@ from typing import Any
 
 from _common import load_json, save_json, sha256_file, utc_now
 from schema_runtime import validate_document
+from metrics import MetricsRecorder
 
 
 SCORE_LIMITS = {
@@ -149,6 +150,7 @@ def main() -> int:
     parser.add_argument("--issue", action="append", default=[], choices=sorted(ISSUES))
     parser.add_argument("--repair-attempts-used", type=int, choices=[0, 1], default=0)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--metrics", type=Path)
     args = parser.parse_args()
     scores = {name: getattr(args, name) for name in SCORE_LIMITS}
     report = build_quality_report(
@@ -161,6 +163,9 @@ def main() -> int:
         repair_attempts_used=args.repair_attempts_used,
     )
     save_json(args.output.expanduser().resolve(), report)
+    if args.metrics:
+        recorder = MetricsRecorder(args.metrics)
+        recorder.increment("visual_review_calls", stage="title_quality", orientation=args.orientation)
     print(args.output.expanduser().resolve())
     return 0
 

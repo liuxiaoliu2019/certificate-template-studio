@@ -18,6 +18,7 @@ from font_registry import FontRegistry
 from schema_runtime import validate_document
 from title_planner import LAYOUT_FAMILIES, build_plan, normalize_title
 from title_renderer import render_title_plan
+from metrics import MetricsRecorder
 
 
 TARGETS = {"landscape": (2172, 1536), "portrait": (1536, 2172)}
@@ -113,6 +114,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--shadow-blur", type=int, default=0)
     parser.add_argument("--base-text-free", action="store_true")
     parser.add_argument("--ai-title-validated", action="store_true")
+    parser.add_argument("--metrics", type=Path)
     return parser.parse_args()
 
 
@@ -279,6 +281,13 @@ def main() -> int:
     validate_document(payload, "finalization_report.schema.json")
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if args.metrics:
+        MetricsRecorder(args.metrics).increment(
+            "visual_review_calls",
+            stage="finalization",
+            orientation=args.orientation,
+            path=display_path(report, project_root),
+        )
     print(output)
     print(report)
     return 0

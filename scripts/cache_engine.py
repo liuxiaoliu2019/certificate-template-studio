@@ -8,6 +8,7 @@ from typing import Any
 from _common import load_json, save_json, sha256_file, utc_now
 from project_io import resolve_project_path
 from schema_runtime import validate_document
+from metrics import MetricsRecorder
 
 
 STAGE_ORDER = (
@@ -73,12 +74,20 @@ class CacheEngine:
     def lookup(self, stage: str, inputs: dict[str, Any]) -> dict[str, Any] | None:
         entry = self.state["entries"].get(stage)
         if not entry or entry["input_hash"] != canonical_input_hash(inputs):
+            self._metric("cache_misses", stage)
             return None
         for artifact in entry["artifacts"]:
             path = resolve_project_path(self.project, artifact["path"])
             if not path.is_file() or sha256_file(path) != artifact["sha256"]:
+                self._metric("cache_misses", stage)
                 return None
+        self._metric("cache_hits", stage)
         return entry
+
+    def _metric(self, counter: str, stage: str) -> None:
+        metrics_path = self.project / "logs" / "execution_metrics.json"
+        if metrics_path.is_file():
+            MetricsRecorder(metrics_path).increment(counter, stage=stage)
 
     def record(self, stage: str, inputs: dict[str, Any], artifacts: list[str]) -> dict[str, Any]:
         if stage not in STAGE_ORDER:
