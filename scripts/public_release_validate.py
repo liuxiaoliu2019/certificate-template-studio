@@ -9,9 +9,11 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 import jsonschema
@@ -45,12 +47,18 @@ EXAMPLE_SCHEMAS = {
     "examples/SunnyFarmCourse/character_identity.json": "schemas/character_identity.schema.json",
     "examples/SunnyFarmCourse/style_recommendation.json": "schemas/style_recommendation.schema.json",
     "examples/SunnyFarmCourse/master_style_profile.json": "schemas/master_style_profile.schema.json",
+    "examples/SunnyFarmCourse/active_context.json": "schemas/active_context.schema.json",
+    "examples/SunnyFarmCourse/derivative_manifest.json": "schemas/derivative_manifest.schema.json",
+    "examples/SunnyFarmCourse/execution_metrics.json": "schemas/execution_metrics.schema.json",
+    "examples/SunnyFarmCourse/quality_report.json": "schemas/quality_report.schema.json",
+    "examples/SunnyFarmCourse/source_fingerprint.json": "schemas/source_fingerprint.schema.json",
     "examples/FormalNature/style_dna.json": "schemas/style_dna.schema.json",
     "examples/FormalNature/style_recommendation.json": "schemas/style_recommendation.schema.json",
     "examples/UrbanMotionCourse/style_dna.json": "schemas/style_dna.schema.json",
     "examples/UrbanMotionCourse/style_recommendation.json": "schemas/style_recommendation.schema.json",
     "examples/TemplateBidirectional/template_dna.json": "schemas/template_dna.schema.json",
     "examples/TemplateBidirectional/template_project_manifest.json": "schemas/template_project_manifest.schema.json",
+    "examples/TitleLayouts/certificate-of-completion-landscape.json": "schemas/title_layout_plan.schema.json",
 }
 
 ALLOWED_IMAGES = {
@@ -607,6 +615,71 @@ def validate_smoke_tests(root: Path, errors: list[str]) -> None:
             errors.append(f"近方形模板显式方向初始化失败：{accepted.stderr or accepted.stdout}")
 
 
+def validate_release_toolchain(root: Path, errors: list[str]) -> None:
+    """Exercise tests, deterministic packaging, and the host installer in isolation."""
+    with tempfile.TemporaryDirectory(prefix="certificate-studio-toolchain-") as temp_value:
+        temp = Path(temp_value)
+        pytest_result = run(
+            [sys.executable, "-m", "pytest", "-q", "--basetemp", str(temp / "pytest")],
+            root,
+        )
+        if pytest_result.returncode != 0:
+            errors.append(f"完整测试失败：{pytest_result.stderr or pytest_result.stdout}")
+
+        archive = temp / "certificate-template-studio-v1.7.0.zip"
+        build_result = run(
+            [sys.executable, "scripts/build_release.py", str(root), "--output", str(archive)],
+            root,
+        )
+        if build_result.returncode != 0:
+            errors.append(f"发布包构建失败：{build_result.stderr or build_result.stdout}")
+        elif not archive.is_file():
+            errors.append("发布包构建命令成功但没有生成 ZIP")
+        else:
+            try:
+                with zipfile.ZipFile(archive) as package:
+                    members = set(package.namelist())
+                required_members = {
+                    "certificate-template-studio/SKILL.md",
+                    "certificate-template-studio/README.md",
+                    "certificate-template-studio/scripts/quick_validate.py",
+                    "certificate-template-studio/assets/controls/landscape_v3.png",
+                    "certificate-template-studio/assets/controls/portrait_v3.png",
+                }
+                missing = required_members - members
+                if missing:
+                    raise ValueError(f"ZIP 缺少文件：{sorted(missing)}")
+                if any("/.git/" in name or "/dist/" in name or "__pycache__" in name for name in members):
+                    raise ValueError("ZIP 包含不应发布的缓存、Git 或 dist 内容")
+            except Exception as exc:
+                errors.append(f"发布包内容无效：{exc}")
+
+        destination = temp / "certificate-template-studio"
+        if os.name == "nt":
+            shell = shutil.which("pwsh") or shutil.which("powershell")
+            command = (
+                [shell, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(root / "install.ps1"), "-Destination", str(destination)]
+                if shell
+                else None
+            )
+        else:
+            shell = shutil.which("bash")
+            command = [shell, str(root / "install.sh"), "--destination", str(destination)] if shell else None
+        if command is None:
+            errors.append("找不到当前平台的安装脚本运行环境")
+        else:
+            install_result = run(command, root)
+            if install_result.returncode != 0:
+                errors.append(f"隔离安装演练失败：{install_result.stderr or install_result.stdout}")
+            else:
+                installed_check = run(
+                    [sys.executable, str(destination / "scripts/quick_validate.py"), str(destination)],
+                    destination,
+                )
+                if installed_check.returncode != 0:
+                    errors.append(f"安装后校验失败：{installed_check.stderr or installed_check.stdout}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="验证 certificate-template-studio 公开发布包。")
     parser.add_argument("skill", nargs="?", type=Path, default=Path(__file__).resolve().parents[1])
@@ -621,12 +694,13 @@ def main() -> int:
     validate_control_assets(root, errors)
     validate_font_assets(root, errors)
     validate_smoke_tests(root, errors)
+    validate_release_toolchain(root, errors)
 
     if errors:
         for error in errors:
             print(f"FAIL: {error}", file=sys.stderr)
         return 1
-    print("PASS: 公开发布校验通过（结构、隐私、格式、Schema、控制图与初始化冒烟测试）。")
+    print("PASS: 公开发布校验通过（结构、隐私、Schema、控制图、两模式冒烟、完整测试、打包与隔离安装）。")
     return 0
 
 

@@ -49,7 +49,8 @@ if (Test-Path -LiteralPath $destinationRoot) {
 
 $topFiles = @(
     'SKILL.md', 'README.md', 'README.en.md', 'LICENSE',
-    'LICENSE-ASSETS.md', 'NOTICE.md', 'requirements-dev.txt'
+    'LICENSE-ASSETS.md', 'NOTICE.md', 'CHANGELOG.md', 'CONTRIBUTING.md',
+    'SECURITY.md', 'requirements-dev.txt'
 )
 $runtimeDirectories = @('agents', 'assets', 'examples', 'prompts', 'references', 'schemas', 'scripts')
 

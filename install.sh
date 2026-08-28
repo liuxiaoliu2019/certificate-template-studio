@@ -60,7 +60,7 @@ fi
 
 mkdir -p "$destination"
 
-top_files=(SKILL.md README.md README.en.md LICENSE LICENSE-ASSETS.md NOTICE.md requirements-dev.txt)
+top_files=(SKILL.md README.md README.en.md LICENSE LICENSE-ASSETS.md NOTICE.md CHANGELOG.md CONTRIBUTING.md SECURITY.md requirements-dev.txt)
 runtime_dirs=(agents assets examples prompts references schemas scripts)
 
 for file in "${top_files[@]}"; do

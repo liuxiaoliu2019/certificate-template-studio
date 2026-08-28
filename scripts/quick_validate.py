@@ -24,12 +24,23 @@ REQUIRED_FILES = [
     "references/character-identity-lock.md",
     "references/template-bidirectional-workflow.md",
     "references/output-and-title-rendering.md",
+    "references/context-routing.md",
+    "references/title-design-system.md",
     "schemas/character_identity.schema.json",
     "schemas/certificate_style_profile.schema.json",
     "schemas/style_recommendation.schema.json",
     "schemas/master_style_profile.schema.json",
     "schemas/template_dna.schema.json",
     "schemas/template_project_manifest.schema.json",
+    "schemas/active_context.schema.json",
+    "schemas/derivative_manifest.schema.json",
+    "schemas/execution_metrics.schema.json",
+    "schemas/migration_log.schema.json",
+    "schemas/quality_report.schema.json",
+    "schemas/source_fingerprint.schema.json",
+    "schemas/title_layout_plan.schema.json",
+    "schemas/title_quality_report.schema.json",
+    "schemas/workflow_event.schema.json",
     "prompts/recommend-certificate-styles.md",
     "prompts/build-style-profile.md",
     "prompts/validate-style-diversity.md",
@@ -38,11 +49,24 @@ REQUIRED_FILES = [
     "prompts/regenerate-source-orientation.md",
     "prompts/derive-opposite-orientation.md",
     "prompts/generate-title-free-base.md",
+    "prompts/repair-title-layout.md",
+    "prompts/review-certificate-candidates.md",
+    "prompts/review-title-quality.md",
     "scripts/extract_character_refs.py",
     "scripts/init_template_project.py",
     "scripts/update_template_manifest.py",
     "scripts/record_template_revision.py",
     "scripts/finalize_certificate.py",
+    "scripts/cache_engine.py",
+    "scripts/context_router.py",
+    "scripts/derive_title.py",
+    "scripts/metrics.py",
+    "scripts/migrate_project.py",
+    "scripts/quality_gate.py",
+    "scripts/title_planner.py",
+    "scripts/title_quality.py",
+    "scripts/title_renderer.py",
+    "scripts/workflow_engine.py",
     "schemas/finalization_report.schema.json",
     "assets/controls/landscape_v3.png",
     "assets/controls/portrait_v3.png",
@@ -190,9 +214,9 @@ def validate_template_example(root: Path) -> None:
         if any(key in region for key in ("content", "text", "transcript", "original_text")):
             raise ValueError("模板 DNA 不得保存或转录源文字")
     stage = manifest.get("workflow", {}).get("stage")
-    if stage == "source_approved":
+    if stage in {"deriving_opposite", "validating_opposite", "awaiting_opposite_approval", "complete"}:
         if manifest[source].get("status") != "approved":
-            raise ValueError("source_approved 状态必须有已批准的源方向")
+            raise ValueError("生成另一方向前必须有已批准的源方向")
         if manifest[opposite].get("status") not in {"ready", "generating", "awaiting_approval", "approved"}:
             raise ValueError("源方向批准后，另一方向必须解除阻塞")
 
@@ -214,15 +238,15 @@ def main() -> int:
         text = skill_path.read_text(encoding="utf-8")
         if not re.search(r"^name:\s*certificate-template-studio\s*$", text, re.MULTILINE):
             errors.append("SKILL.md name 不正确")
-        if not re.search(r'version:\s*"1\.6\.0"', text):
-            errors.append("SKILL.md 版本不是 1.6.0")
+        if not re.search(r'version:\s*"1\.7\.0"', text):
+            errors.append("SKILL.md 版本不是 1.7.0")
         if text.count(MODE_MENU) != 1:
             errors.append("SKILL.md 缺少固定模式菜单或菜单文案发生变化")
         for invariant in (
-            "用户明确回复 `1` 或 `2` 前，不分析图片",
-            "selected_mode=textbook_cover",
-            "selected_mode=template_bidirectional",
-            "本项目后续步骤不重复显示菜单",
+            "用户已明确模式时不重复菜单",
+            "已有项目按 manifest 恢复",
+            "默认只提交最高分且无硬失败的一套",
+            "每个方向最多自动修正一次",
         ):
             if invariant not in text:
                 errors.append(f"SKILL.md 缺少模式菜单不变量：{invariant}")
@@ -280,8 +304,8 @@ def main() -> int:
         if '"selected_mode": "template_bidirectional"' not in template_init:
             raise ValueError("模板初始化脚本未写入 selected_mode")
         generation = load_json(root / "examples" / "SunnyFarmCourse" / "generation_config.json")
-        if generation.get("schema_version") != "1.3":
-            raise ValueError("示例 generation_config 不是 v1.3")
+        if generation.get("schema_version") != "1.4":
+            raise ValueError("示例 generation_config 不是 v1.4")
         if generation.get("outputs") != {
             "landscape": {"width_px": 2172, "height_px": 1536, "format": "PNG", "purpose": "mini_program"},
             "portrait": {"width_px": 1536, "height_px": 2172, "format": "PNG", "purpose": "mini_program"},
@@ -295,7 +319,7 @@ def main() -> int:
             print(f"FAIL: {item}", file=sys.stderr)
         return 1
     recommendation_count = len(list((root / "examples").rglob("style_recommendation.json")))
-    print(f"PASS: certificate-template-studio v1.6.0；固定小程序尺寸；三模式标题；强制模式菜单；角色身份锁；模板双向审批锁；7 个风格家族；{recommendation_count} 组推荐测试。")
+    print(f"PASS: certificate-template-studio v1.7.0；固定小程序尺寸；六类标题设计；质量托管；最小上下文；缓存；角色身份锁；模板双向审批锁；7 个风格家族；{recommendation_count} 组推荐测试。")
     return 0
 
 
