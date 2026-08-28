@@ -1,17 +1,17 @@
 ---
 name: certificate-template-studio
-description: 从教材封面创建带角色身份锁的证书，或把用户提供的任意横版/竖版证书模板高保真重制为横竖双 Master。适用于三方案探索、完整边框、方向重构、修订回退、审批和多标题复用。
+description: 从教材封面创建带角色身份锁的横竖证书 Master，或把现成横版/竖版证书模板高保真双向重构；支持质量托管、标题设计、审批、回退和多标题复用。
 metadata:
-  version: "1.6.0"
+  version: "1.7.0"
 ---
 
 # Certificate Template Studio
 
-建立可回退、可审批、可复用的教材证书设计项目。成品默认只生成唯一主标题；姓名、正文、日期、学校、签名和印章留给后期叠加。
+创建可验证、可回退、可复用的横竖证书。成品唯一可读文字是用户输入的主标题；姓名、正文、日期、学校、签名和印章由后期叠加。
 
-## 智能启动与模式菜单
+## 启动路由
 
-先读取 [references/start-routing-rules.md](references/start-routing-rules.md)，或运行 `scripts/start_router.py`。用户只说开始工作、没有明确模式或表达冲突时，只输出以下固定菜单：
+先按 [start-routing-rules.md](references/start-routing-rules.md) 路由，或运行 `scripts/start_router.py`。用户未明确模式时只输出：
 
 ```text
 请选择工作模式：
@@ -21,148 +21,63 @@ metadata:
 请回复 1 或 2。
 ```
 
-- 显示菜单时不得在前后增加介绍、推荐、图片分析或其他问题。用户明确回复 `1` 或 `2` 前，不分析图片、不创建项目、不询问标题、不读取模式专属 reference 或 prompt，也不生图。
-- 用户已明确写出“模式 1”或“教材封面生成证书”时直接锁定 `selected_mode=textbook_cover`，不重复菜单；缺封面时只问：`请上传教材封面。`
-- 用户已明确写出“模式 2”或“现成模板双向转换”时直接锁定 `selected_mode=template_bidirectional`，不重复菜单；缺模板时只问：`请上传现成横版或竖版证书模板。`
-- 用户同一条消息已经给出模式、图片和标题时一次接收，不重复询问；表达冲突或不明确时原样显示菜单。
-- 模式锁定后，本项目后续步骤不重复显示菜单。只有用户明确要求重新开始、切换模式或建立新项目时，才再次显示菜单。
-- 已有项目中的“继续”按 manifest 恢复，不重复菜单和有效分析。
-- 初始化项目时必须把已锁定模式写入 manifest 的 `selected_mode`。切换模式必须新建对应模式项目，不复用另一模式的分析、manifest 或候选图。
+用户已明确模式时不重复菜单；同一消息中的模式、图片和标题一次接收。缺图片时只请求对应图片，缺标题时完成来源分析后只问：`请输入本次证书标题：`。已有项目按 manifest 恢复，不重复有效阶段。
 
-`textbook_cover` 执行“教材证书模式”。`template_bidirectional` 读取 [references/template-bidirectional-workflow.md](references/template-bidirectional-workflow.md)，执行“模板双向生成模式”；该模式不要求教材封面、教材 Style DNA 或三方案探索，先审批方向由源模板方向决定。
+## 最小上下文与缓存
 
-## 教材证书模式：开始前
+每个动作先按 [context-routing.md](references/context-routing.md) 建立最小 `active_context.json`，不得加载完整历史、另一模式资料或未使用角色裁切。按 `configs/source_fingerprint.json` 和 `cache_state.json` 复用有效结果：改标题只失效标题层；改来源才失效全链路；改控制图只影响对应方向及下游。
 
-1. 定位教材封面和已有项目。新项目用 `scripts/init_project.py` 初始化，不覆盖非空目录。
-2. 新项目先分析封面并写入 `analysis/style_dna.json`；再按 [references/character-identity-lock.md](references/character-identity-lock.md) 建立 `analysis/character_identity.json` 和原图角色裁切，不要立即生图。
-3. 若用户尚未给出标题，Style DNA 与角色身份档案完成后必须暂停，只问：`请输入本次证书标题：`。不要推荐标题或同时询问风格偏好。
-4. 同教材已有已批准 Master 时，默认走多标题衍生；只有用户明确要求重新探索风格时才重新生成三套。
+## 模式 1｜教材封面
 
-## 按阶段读取
+1. 用 `scripts/init_project.py` 初始化；读取 [design-rules.md](references/design-rules.md) 和 `prompts/analyze-cover.md`，按“画风 > 核心元素 > 色彩 > 整体气质 > 原构图”保存 Style DNA。
+2. 封面含人物或动物时读取 [character-identity-lock.md](references/character-identity-lock.md)，建立身份档案和原图裁切。姿势、朝向、动作与媒介可变；头发/头部、脸部、服装或表面分区、配件、物种和比例不可变。
+3. 标题确认后读取风格库与评分规则，内部建立三个不同的 Style Profile 和横版候选，其中至少一个为完整边框主导型。
+4. 按 [test-and-scoring.md](references/test-and-scoring.md) 统一验收三套；默认只提交最高分且无硬失败的一套。用户要求“查看其他方案”时再展示其余合格候选。
+5. 选择不等于批准。自然语言修改按 [revision-levels-and-state-lock.md](references/revision-levels-and-state-lock.md) 记录 LEVEL1/2/3 和历史。
+6. 用户明确确认横版定稿后才生成竖版；同时输入封面、Style DNA、批准横版、批准 Profile、实际角色证据和竖版控制图，重新构图而非裁切或拉伸。
 
-- 分析封面：读取 [references/design-rules.md](references/design-rules.md)。
-- 封面含人物或动物角色：读取 [references/character-identity-lock.md](references/character-identity-lock.md)。
-- 推荐风格：读取 [references/certificate-style-library.md](references/certificate-style-library.md)、[references/style-compatibility-scoring.md](references/style-compatibility-scoring.md) 和 [references/style-parameter-rules.md](references/style-parameter-rules.md)。
-- 任何生图或标题修改：读取 [references/v3-title-rules.md](references/v3-title-rules.md)。
-- 任何正式输出或 Master 审批：读取 [references/output-and-title-rendering.md](references/output-and-title-rendering.md)。
-- 生成或评估三套横版：读取 [references/test-and-scoring.md](references/test-and-scoring.md)。
-- 选择、修改、确认或回退：读取 [references/revision-levels-and-state-lock.md](references/revision-levels-and-state-lock.md)。
-- 已有 Master 或同教材换标题：读取 [references/multi-title-rules.md](references/multi-title-rules.md)。
-- 需要了解本轮风格来源时，读取 [references/reference-image-findings.md](references/reference-image-findings.md)。
-- 模板双向生成：读取 [references/template-bidirectional-workflow.md](references/template-bidirectional-workflow.md) 和 [references/v3-title-rules.md](references/v3-title-rules.md)。
-
-JSON 输出必须符合 `schemas/` 中对应 schema。只加载当前阶段需要的 prompt 和 reference。
-
-为减少干预和上下文浪费，执行具体阶段前按 [references/context-routing.md](references/context-routing.md) 建立最小 `active_context.json`。不得把完整历史、全部 reference、未使用角色裁切或另一模式资料一起加载；相同来源与输入先检查 `configs/cache_state.json`，缓存命中时复用现有分析或成品。
-
-## 教材证书模式：标准工作流
-
-### 1. 初始化、Style DNA 与角色身份
-
-- 提取优先级固定为：`画风 > 核心元素 > 色彩 > 整体气质 > 原构图`。
-- 记录可转译的核心元素，以及不得复制的教材标题、Logo、出版社、系列、版次、ISBN 和独特商业版式。
-- 摄影、写实或混合媒介允许转成证书风格对应的插画媒介，但必须保持核心元素、色彩关系和气质可识别。
-- 对全部可识别的人类与动物角色建立独立身份档案。角色可以改变姿势、动作、朝向和绘制媒介，但发型/头部、脸部、肤色或毛羽色、服装分区、标志性配件、物种与身体比例不得改变。
-- 不要求每套使用全部角色；凡是出现的角色都必须输入完整封面、对应原图裁切和身份档案，并先通过身份一致性硬门。
-- Style DNA 与角色身份档案结束后进入 `waiting_for_title`，不得直接推荐风格或生图。
-
-### 2. 获取用户标题
-
-- 标题只能来自用户手动输入；写入 manifest 后不重复确认。
-- 最终成品唯一可读文字就是该标题。副标题、装饰字、伪文字和变量信息均视为失败。
-- 横竖版标题外接框的水平中心固定为画布 `x=50%`。
-- 竖版标题在 V3 基准位置上固定向上移动 `1.5 cm`。详见标题规则。
-- 标题按 Style Profile 自动选择 `vector_flat`、`vector_effect` 或 `ai_integrated`；用户自然语言要求可覆盖自动结果。
-
-### 3. 推荐三种证书风格
-
-- 标题确认后，使用 `prompts/recommend-certificate-styles.md` 对 7 个风格家族逐一评分。
-- 权重固定为：画风 35、核心元素 25、色彩 20、整体气质 15、原构图可转化性 5；候选最低 70 分。
-- 选择 3 个不同且合格的风格家族，为每个建立 `certificate_style_profile`。
-- 每个 Profile 必须同时建立 `title_treatment`，先确定标题模式再生图。
-- 任意两个 Profile 至少有 3 项核心参数不同。若差异检查失败，先重配方向，不要生图。
-- 三套必须分别承担 `cover_character_led`、`balanced_translation`、`frame_led` 三个设计角色；默认第 3 套为 `frame_led + full_frame`。
-- `frame_led` 以边框造型、纸张、线条、纹样和典礼秩序为主，教材只提供少量配色、年龄感或主题线索；允许不使用角色。边框是独立版式轴，不等同于某一个风格家族。
-- 保存 `analysis/style_recommendation.json` 和三个 Profile，再进入横版生成。
-
-### 4. 生成三套横版
-
-- 每套输入教材封面、Style DNA、用户标题、项目内 `controls/landscape_v3.png` 和各自 Style Profile。含角色方案还必须输入实际使用角色的原图裁切和身份档案。
-- `vector_flat` 与 `vector_effect` 读取 `prompts/generate-title-free-base.md`，生图阶段全图不生成文字；`ai_integrated` 才由生成模型直接生成唯一标题。
-- 教材决定“画什么”；风格 Profile 决定“用什么证书语言表现”；控制图决定“放在哪里和区域密度”。
-- 控制图是隐藏软约束，不复制灰阶、纹理、边界或形状，也不进入成品。
-- 左右下角都必须有清晰视觉锚点；两侧以逐渐变小的图案、线条、环境或色彩形成弱连接。中部可稀疏，不能生硬断开或让一侧完全空白。
-- 中央变量安全区和右下偏内侧落款区必须可排版；安静不等于零密度。
-- 完整边框可沿 Z50 四边连续，在 Z80 四角增强；不得因控制图软约束被退化为零散角花。
-- 含角色方案先进行身份验收：低于 85 分或任一不可改变项明显错误即硬失败，不进入普通百分制评分，也不得提交用户。
-- 原始生图不得直接成为候选或 Master。先用 `scripts/finalize_certificate.py` 生成横版 `2172×1536` 或竖版 `1536×2172` PNG 与收尾报告；比例误差超过 0.5% 必须重生成。
-- 生成并收尾后评分。低于 75 分不得提交；75 至 84 分先自动修正；85 分以上才能提交用户选择。
-- 输出三套后暂停，请用户选择 1/2/3 或提出自然语言修改。选择不是批准。
-
-### 5. 修改、风格锁与回退
-
-- LEVEL1：局部轻改，锁定风格家族、Profile 核心参数、主构图和标题原文。
-- LEVEL2：同一风格家族内重组布局或参数，锁定风格身份、标题原文和中央功能区。
-- LEVEL3：用户明确重做或换风格时解除风格锁，重新评分或建立新 Profile；旧版本保留。
-- 只要修订后仍使用原角色，人物身份锁在 LEVEL1/2/3 均不可解除；更换风格不等于允许重设计角色。
-- 每次修改用 `scripts/record_revision.py` 保存图片、反馈、等级、Style Profile、参数变化和锁定项，不覆盖旧文件。
-- 回退只移动 active revision，保留全部历史。
-
-### 6. 横版批准锁
-
-- 只有用户对明确对象表达定稿意图，例如“确认横版定稿”“确认方案 2 为横版定稿”，才可批准横版。
-- 新版项目还必须绑定 `status=passed` 且与成品哈希、方向和尺寸一致的收尾报告；缺失时不得批准。
-- “第一个可以”“这个不错”“继续”“下一步”、只选择编号、要求继续修改或模型评分均不算批准。
-- 横版未批准时竖版保持阻塞。
-
-### 7. 竖版衍生
-
-- 横版明确批准后，同时输入教材封面、Style DNA、已批准横版、已批准 Style Profile 和项目内 `controls/portrait_v3.png`。若批准横版含角色，同时输入对应身份档案和原图裁切。
-- 继承风格家族和核心参数，按竖版控制图重新构图；禁止裁切、拉伸、旋转或机械搬运横版。
-- 继承已批准的 `title_treatment`；程序标题模式先生成无文字底图，再在最终 `1536×2172` 画布上绘制标题。竖版标题上移约 110 px。
-- 标题水平居中并向上 1.5 cm；继续保持左右锚点、边缘连接、中央安全区和落款功能区。
-- 竖版也必须由用户明确表达“确认竖版定稿”后才能批准。
-
-### 8. Master 与多标题
-
-- 横版批准后记录 Master 横版与已批准 Style Profile；竖版批准后补充 Master 竖版并保存 `master_style_profile.json`。
-- 同教材新标题默认只替换标题并进行必要的字号、字距、换行和少量联动装饰调整，不重新推荐风格。
-- 用户明确要求“重新探索风格”时才建立新分支。
-
-## 模板双向生成模式
-
-1. 用 `scripts/init_template_project.py` 保存用户模板、自动识别横/竖方向并建立独立项目；正方形输入需由用户明确指定源方向。
-2. 用 `prompts/analyze-certificate-template.md` 提取边框、纹样、配色、线宽、材质、非文字装饰、留白和文字区域，保存 `analysis/template_dna.json`。文字区域只记录位置和删除动作，不保存原文。
-3. 若用户尚未给标题，暂停并只问：`请输入证书标题：`。用户已给标题时不重复询问。
-4. 先用源模板、Template DNA、同方向控制图和 `prompts/regenerate-source-orientation.md` 重制一套同方向干净版本。删除全部源文字；按 `title_treatment` 决定生图标题或无文字底图。
-5. 同方向版本达到 85 分且无硬失败后提交用户。必须明确确认该方向定稿，另一方向才解除阻塞。
-6. 用源模板、Template DNA、已批准同方向 Master、目标方向控制图和 `prompts/derive-opposite-orientation.md` 重新构图另一方向。禁止旋转、拉伸、压缩、裁切或直接扩边。
-7. 横竖版标题外接框都锁定 x=50%；竖版另执行相对 V3 基准向上 1.5 cm。
-8. 每个方向默认只生成一套。收尾成固定小程序尺寸并通过报告后才可分别明确批准；两个方向都批准后保存横版与竖版 Master。
-9. 后续新标题默认同时复用两个 Master，只适配标题，不重新分析或重构边框。
-
-## 失败与停止条件
-
-- 多余文字、标题错字、标题偏离水平中心、主体侵入功能区、单侧失重、控制图痕迹、复制教材文字或 Logo，均不得交付。
-- 输出尺寸不是横版 `2172×1536` 或竖版 `1536×2172`、格式不是 PNG、收尾报告缺失或失败，均不得成为 Master。
-- 含角色成品发生身份漂移、角色混合、服装/毛羽色错误或标志性特征缺失时，不得交付；不得用“已改变画风”作为放宽理由。
-- 自动修正最多连续两次。仍不合格时保留最好版本并说明问题，不无限重试。
-- Schema、manifest、Profile 或脚本验证失败时停止生图。
-- 当前环境没有图像生成能力时，可以完成分析、风格推荐、配置和 prompts，但必须明确说明图片尚未生成。
-- 模板模式中若源文字残留、边框断裂、纹样被压扁、设计身份明显丢失，或跳过源方向批准，均不得交付。
-
-## 辅助脚本
+状态机由 `scripts/workflow_engine.py` 强制：
 
 ```text
-python scripts/init_project.py --name SunnyFarmCourse --root <项目父目录> --cover <封面路径>
-python scripts/update_manifest.py <项目目录> --set current_title='"英语之星"'
-python scripts/record_revision.py <项目目录> --orientation landscape --level 1 --artifact <图片> --feedback "标题上移" --style-family S05_childrens_flat_education --profile styles/candidate-2.json
-python scripts/update_manifest.py <项目目录> --approve-landscape selected/master_landscape.png --style-profile styles/approved.json --user-confirmation "确认横版定稿"
-python scripts/quick_validate.py <Skill目录>
-python scripts/finalize_certificate.py --input <原始生图> --output <项目目录>/selected/master_landscape.png --project-root <项目目录> --orientation landscape --title "英语之星" --title-mode vector_flat --base-text-free
-python scripts/init_template_project.py --name ClassicBlue --root <项目父目录> --template <横版或竖版模板路径>
-python scripts/update_template_manifest.py <模板项目目录> --set-title "结业证书"
-python scripts/update_template_manifest.py <模板项目目录> --approve-orientation landscape --artifact selected/master_landscape.png --user-confirmation "确认横版定稿"
+initialized → analyzing_source → awaiting_title → planning_landscape
+→ generating_landscape → validating_landscape → awaiting_landscape_approval
+→ generating_portrait → validating_portrait → awaiting_portrait_approval → complete
 ```
 
-脚本只执行确定性记录，不代替风格判断、视觉评分或用户审批。
+修订、阻塞和多标题是受控分支，不能跳过批准门。
+
+## 模式 2｜现成模板双向转换
+
+读取 [template-bidirectional-workflow.md](references/template-bidirectional-workflow.md)，用 `scripts/init_template_project.py` 初始化。源模板决定边框、纹样、配色、线宽、材质和证书秩序；删除全部源文字，先重制并批准源方向，再按目标控制图重构另一方向。禁止旋转、拉伸、机械裁切、直接扩边或复制纵横布局。
+
+```text
+initialized → analyzing_source → awaiting_title → regenerating_source
+→ validating_source → awaiting_source_approval → deriving_opposite
+→ validating_opposite → awaiting_opposite_approval → complete
+```
+
+## 标题与输出硬门
+
+任何生图或标题修改读取 [v3-title-rules.md](references/v3-title-rules.md)、[title-design-system.md](references/title-design-system.md) 和 [output-and-title-rendering.md](references/output-and-title-rendering.md)。
+
+- 横竖标题完整外接框水平中心固定 `x=50%`，误差不超过 1 px；竖版相对 V3 基准上移约 110 px（1.5 cm）。
+- `CERTIFICATE OF COMPLETION` 必须为 `CERTIFICATE` / `OF COMPLETION` 两行，或等价浅弧/双飘带结构。
+- 标题家族：正式双层、现代双层、典礼弧形、双层飘带、儿童逐字配色、插画融合底座。
+- 丝带或底座只可服务唯一主标题；禁止姓名卡、正文卡、日期徽章、签名横幅等额外文字容器。
+- `vector_flat` 保持纯色无噪点；`vector_effect` 使用确定性渐变、描边和阴影；`ai_integrated` 必须经过视觉文字验收。
+- 正式横版为 `2172×1536` PNG，竖版为 `1536×2172` PNG。必须运行 `scripts/finalize_certificate.py` 并保存通过的收尾报告。
+
+## 质量托管与停止条件
+
+- 角色身份报告先于普通评分；低于 85、任一不可改变特征失败或来源不足均不得提交。
+- 标题专项和整图评分都需至少 85 且无硬失败。每个方向最多自动修正一次；仍失败则暂停请用户决定。
+- 错字、缺字、多余文字、标题偏心、尺寸错误、控制图痕迹、复制教材 Logo/文字、单侧失重、功能区侵入、边框断裂或审批证据不匹配均为硬失败。
+- 当前环境没有图像生成能力时，只完成分析、配置与 Prompt，并明确说明图片尚未生成。
+
+## 审批、多标题与迁移
+
+只有针对明确文件的“确认横版定稿/确认竖版定稿”等肯定原话才构成批准；“可以、不错、继续、1/2/3”都不构成批准。批准必须绑定当前标题、方向、尺寸、成品哈希和收尾报告。
+
+双 Master 批准后按 [multi-title-rules.md](references/multi-title-rules.md) 运行 `scripts/derive_title.py`；不重新分析来源或探索三套。用户明确要求重新探索风格时才退出快速通道。旧项目先运行 `scripts/migrate_project.py`；缺新版证据的旧 Master 标记 `legacy_unverified`。
+
+JSON 必须符合 `schemas/`。脚本负责确定性状态、记录、验证与渲染，不代替用户批准。

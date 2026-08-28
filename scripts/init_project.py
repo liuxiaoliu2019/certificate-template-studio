@@ -69,7 +69,7 @@ def main() -> int:
 
     now = utc_now()
     generation_config = {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "candidate_count": 3,
         "control_mode": "soft",
         "control_templates": {
@@ -93,7 +93,8 @@ def main() -> int:
             "portrait_up_shift_output_px": 110,
             "render_mode": "auto",
             "allowed_render_modes": ["vector_flat", "vector_effect", "ai_integrated"],
-            "forbidden_containers": ["banner", "ribbon", "card", "badge", "title_frame"],
+            "title_container_allowed": ["none", "arc", "single_ribbon", "double_ribbon", "illustrated_base"],
+            "non_title_container_forbidden": ["name_card", "body_card", "date_badge", "signature_banner"],
         },
         "outputs": {
             "landscape": {"width_px": 2172, "height_px": 1536, "format": "PNG", "purpose": "mini_program"},
@@ -108,7 +109,7 @@ def main() -> int:
             "scope": "all_human_and_animal_characters",
             "appearance_policy": "optional_but_faithful_when_used",
             "minimum_score": 85,
-            "max_auto_corrections": 2,
+            "max_auto_corrections": 1,
             "reference_dir": "analysis/character_refs",
         },
         "concept_roles": ["cover_character_led", "balanced_translation", "frame_led"],

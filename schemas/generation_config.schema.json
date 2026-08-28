@@ -16,7 +16,7 @@
     "multi_title_policy"
   ],
   "properties": {
-    "schema_version": { "enum": ["1.0", "1.1", "1.2", "1.3"] },
+    "schema_version": { "enum": ["1.0", "1.1", "1.2", "1.3", "1.4"] },
     "candidate_count": { "const": 3 },
     "control_mode": { "const": "soft" },
     "control_templates": {
@@ -43,7 +43,7 @@
     "title": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["value", "source", "only_readable_text", "horizontal_center_x_percent", "portrait_up_shift_cm", "portrait_up_shift_canvas_percent", "forbidden_containers"],
+      "required": ["value", "source", "only_readable_text", "horizontal_center_x_percent", "portrait_up_shift_cm", "portrait_up_shift_canvas_percent"],
       "properties": {
         "value": { "type": ["string", "null"] },
         "source": { "const": "manual_user_input" },
@@ -59,7 +59,9 @@
           "contains": { "const": "banner" },
           "minItems": 1,
           "items": { "type": "string" }
-        }
+        },
+        "title_container_allowed": { "const": ["none", "arc", "single_ribbon", "double_ribbon", "illustrated_base"] },
+        "non_title_container_forbidden": { "const": ["name_card", "body_card", "date_badge", "signature_banner"] }
       }
     },
     "outputs": {
@@ -89,7 +91,7 @@
         "scope": { "const": "all_human_and_animal_characters" },
         "appearance_policy": { "const": "optional_but_faithful_when_used" },
         "minimum_score": { "const": 85 },
-        "max_auto_corrections": { "const": 2 },
+        "max_auto_corrections": { "enum": [1, 2] },
         "reference_dir": { "const": "analysis/character_refs" }
       }
     },
@@ -154,6 +156,22 @@
                 "required": ["width_px", "height_px", "format", "purpose"],
                 "properties": { "width_px": { "const": 1536 }, "height_px": { "const": 2172 } }
               }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "schema_version": { "const": "1.4" } } },
+      "then": {
+        "required": ["style_engine", "identity_policy", "concept_roles"],
+        "properties": {
+          "title": { "required": ["value", "source", "only_readable_text", "horizontal_center_x_percent", "portrait_up_shift_cm", "portrait_up_shift_canvas_percent", "portrait_up_shift_output_px", "render_mode", "allowed_render_modes", "title_container_allowed", "non_title_container_forbidden"] },
+          "identity_policy": { "properties": { "max_auto_corrections": { "const": 1 } }, "required": ["max_auto_corrections"] },
+          "outputs": {
+            "properties": {
+              "landscape": { "properties": { "width_px": { "const": 2172 }, "height_px": { "const": 1536 } } },
+              "portrait": { "properties": { "width_px": { "const": 1536 }, "height_px": { "const": 2172 } } }
             }
           }
         }

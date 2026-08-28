@@ -50,16 +50,16 @@
 | 原文字清除与无多余文字 | 10 |
 | 无拉伸、裁切和重复破绽 | 5 |
 
-85–100 分且无硬失败才可提交；75–84 分先自动修正；低于 75 分不提交。每个方向连续自动修正最多两次。
+85–100 分且无硬失败才可提交；75–84 分只自动修正最佳候选一次；低于 75 分只重生成最有潜力方向一次。每个方向的标题层最多自动修正一次，仍不合格则暂停。
 
 硬失败：文字残留或伪文字、标题错误/偏位、竖版标题未上移、边框断裂、压缩/拉伸/裁切、纹样严重变形或接缝、配色/材质/典礼感丢失、功能区被侵占、控制图进入成品、角色身份失败。
 
 ## 7. 状态、修订与 Master
 
 ```text
-initialized -> template_analyzed -> waiting_for_title -> title_confirmed
-            -> regenerating_source -> awaiting_source_approval -> source_approved
-            -> deriving_opposite -> awaiting_opposite_approval -> complete
+initialized -> analyzing_source -> awaiting_title -> regenerating_source
+            -> validating_source -> awaiting_source_approval -> deriving_opposite
+            -> validating_opposite -> awaiting_opposite_approval -> complete
 ```
 
 - 初始化：`scripts/init_template_project.py`
