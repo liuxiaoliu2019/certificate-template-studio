@@ -30,6 +30,7 @@
     "created_at": { "type": "string", "format": "date-time" },
     "updated_at": { "type": "string", "format": "date-time" },
     "source_cover": { "type": "string", "minLength": 1 },
+    "source_fingerprint_path": { "type": "string", "minLength": 1 },
     "style_dna_path": { "type": "string", "minLength": 1 },
     "character_identity_path": { "type": "string", "minLength": 1 },
     "character_reference_dir": { "type": "string", "minLength": 1 },

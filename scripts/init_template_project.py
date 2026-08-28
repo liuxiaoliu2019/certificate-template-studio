@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from _common import safe_slug, save_json, utc_now
+from cache_engine import build_source_fingerprint
 
 try:
     from PIL import Image, ImageOps
@@ -114,6 +115,7 @@ def main() -> int:
         "created_at": now,
         "updated_at": now,
         "source_template": source_target.relative_to(project).as_posix(),
+        "source_fingerprint_path": "configs/source_fingerprint.json",
         "source_orientation": orientation,
         "opposite_orientation": opposite,
         "source_dimensions": {"width_px": width, "height_px": height},
@@ -148,6 +150,15 @@ def main() -> int:
         "entries": [],
     }
     save_json(manifest_path, manifest)
+    save_json(
+        project / "configs" / "source_fingerprint.json",
+        build_source_fingerprint(
+            project,
+            mode="template_bidirectional",
+            source=manifest["source_template"],
+        ),
+    )
+    save_json(project / "configs" / "cache_state.json", {"schema_version": "1.0", "entries": {}})
     save_json(project / "revisions" / "revision_log.json", revision_log)
     (project / "logs" / "run_log.md").write_text(
         f"# Run Log\n\n- {now} 模板双向项目初始化；源方向为 {orientation}；等待 Template DNA 分析。\n",

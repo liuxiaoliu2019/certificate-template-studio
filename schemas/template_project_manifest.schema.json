@@ -14,6 +14,7 @@
     "created_at": { "type": "string", "format": "date-time" },
     "updated_at": { "type": "string", "format": "date-time" },
     "source_template": { "type": "string", "minLength": 1 },
+    "source_fingerprint_path": { "type": "string", "minLength": 1 },
     "source_orientation": { "$ref": "#/$defs/orientation" },
     "opposite_orientation": { "$ref": "#/$defs/orientation" },
     "source_dimensions": {

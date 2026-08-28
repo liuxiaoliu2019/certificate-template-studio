@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from _common import safe_slug, save_json, utc_now
+from cache_engine import build_source_fingerprint
 
 
 PROJECT_DIRS = [
@@ -138,6 +139,7 @@ def main() -> int:
         "created_at": now,
         "updated_at": now,
         "source_cover": cover_target.relative_to(project).as_posix(),
+        "source_fingerprint_path": "configs/source_fingerprint.json",
         "style_dna_path": "analysis/style_dna.json",
         "character_identity_path": "analysis/character_identity.json",
         "character_reference_dir": "analysis/character_refs",
@@ -194,6 +196,15 @@ def main() -> int:
 
     save_json(project / "configs" / "generation_config.json", generation_config)
     save_json(manifest_path, manifest)
+    save_json(
+        project / "configs" / "source_fingerprint.json",
+        build_source_fingerprint(
+            project,
+            mode="textbook_cover",
+            source=manifest["source_cover"],
+        ),
+    )
+    save_json(project / "configs" / "cache_state.json", {"schema_version": "1.0", "entries": {}})
     save_json(project / "revisions" / "revision_log.json", revision_log)
     (project / "logs" / "run_log.md").write_text(
         f"# Run Log\n\n- {now} 项目初始化；等待 Style DNA 分析、用户标题与风格推荐。\n", encoding="utf-8"

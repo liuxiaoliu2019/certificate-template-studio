@@ -5,7 +5,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from _common import load_json, project_file
+from _common import load_json, project_file, save_json, sha256_file
+from cache_engine import build_source_fingerprint
 
 try:
     from PIL import Image, ImageOps
@@ -74,7 +75,17 @@ def main() -> int:
             target.parent.mkdir(parents=True, exist_ok=True)
             box = pixel_box(character["source_region"], source.width, source.height, args.padding)
             source.crop(box).save(target, format="PNG", optimize=True)
+            character["reference_crop_sha256"] = sha256_file(target)
             print(f"{character['character_id']}: {target}")
+    registry["source_cover_sha256"] = sha256_file(cover_path)
+    save_json(registry_path, registry)
+    fingerprint = build_source_fingerprint(
+        project,
+        mode="textbook_cover",
+        source=registry["source_cover"],
+        characters={item["character_id"]: item["reference_crop"] for item in characters},
+    )
+    save_json(project / "configs" / "source_fingerprint.json", fingerprint)
     return 0
 
 
