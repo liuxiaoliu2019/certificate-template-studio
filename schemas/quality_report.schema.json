@@ -19,7 +19,7 @@
     "candidate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["candidate_id", "artifact", "scores", "total", "hard_failures", "qualified"],
+      "required": ["candidate_id", "artifact", "scores", "total", "hard_failures", "qualified", "used_character_ids", "character_identity_reports"],
       "properties": {
         "candidate_id": {"type": "string", "minLength": 1},
         "artifact": {
@@ -41,7 +41,9 @@
         },
         "total": {"type": "integer", "minimum": 0, "maximum": 100},
         "hard_failures": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-        "qualified": {"type": "boolean"}
+        "qualified": {"type": "boolean"},
+        "used_character_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "character_identity_reports": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
       }
     }
   }

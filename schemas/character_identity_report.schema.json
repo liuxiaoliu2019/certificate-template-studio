@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/certificate-template-studio/character_identity_report.schema.json",
+  "title": "Character identity evidence report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "character_id", "source_crop", "candidate", "score", "immutable_features", "source_sufficient", "status", "created_at"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "character_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "source_crop": {"$ref": "#/$defs/file"},
+    "candidate": {"$ref": "#/$defs/file"},
+    "score": {"type": "integer", "minimum": 0, "maximum": 100},
+    "immutable_features": {
+      "type": "object", "additionalProperties": false,
+      "required": ["hair_or_head", "face", "clothing_or_surface", "accessories", "species", "proportions"],
+      "properties": {
+        "hair_or_head": {"type": "boolean"}, "face": {"type": "boolean"},
+        "clothing_or_surface": {"type": "boolean"}, "accessories": {"type": "boolean"},
+        "species": {"type": "boolean"}, "proportions": {"type": "boolean"}
+      }
+    },
+    "source_sufficient": {"type": "boolean"},
+    "status": {"enum": ["passed", "hard_fail", "blocked"]},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "file": {"type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": {"path": {"type": "string", "minLength": 1}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}}
+  }
+}
