@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.codex/skills/certificate-template-studio/schemas/title_layout_plan.schema.json",
+  "title": "Certificate Title Layout Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "title", "normalized_title", "language", "orientation", "layout_family", "render_mode", "center_x_percent", "width_percent", "portrait_up_shift_px", "container", "lines", "font_roles", "created_at"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "title": { "type": "string", "minLength": 1 },
+    "normalized_title": { "type": "string", "minLength": 1 },
+    "language": { "enum": ["zh", "en", "mixed", "other"] },
+    "orientation": { "enum": ["landscape", "portrait"] },
+    "layout_family": { "enum": ["formal_two_tier", "modern_two_tier", "ceremonial_arc", "double_ribbon", "playful_children", "illustrated_integrated"] },
+    "render_mode": { "enum": ["vector_flat", "vector_effect", "ai_integrated"] },
+    "center_x_percent": { "const": 50 },
+    "width_percent": { "type": "number", "minimum": 52, "maximum": 72 },
+    "portrait_up_shift_px": { "type": "integer", "enum": [0, 110] },
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "title_only"],
+      "properties": {
+        "type": { "enum": ["none", "arc", "single_ribbon", "double_ribbon", "illustrated_base"] },
+        "title_only": { "const": true }
+      }
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "role", "size_ratio", "tracking_em", "baseline_offset_em", "path"],
+        "properties": {
+          "text": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["primary", "secondary"] },
+          "size_ratio": { "type": "number", "minimum": 0.4, "maximum": 1 },
+          "tracking_em": { "type": "number", "minimum": -0.05, "maximum": 0.35 },
+          "baseline_offset_em": { "type": "number", "minimum": -0.3, "maximum": 0.3 },
+          "path": { "enum": ["straight", "arc_up", "ribbon"] }
+        }
+      }
+    },
+    "font_roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "secondary"],
+      "properties": {
+        "primary": { "enum": ["formal_serif", "modern_sans", "ceremonial_display", "children_round"] },
+        "secondary": { "enum": ["formal_serif", "modern_sans", "ceremonial_display", "children_round"] }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}
