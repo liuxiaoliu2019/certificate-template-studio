@@ -9,9 +9,9 @@ metadata:
 
 建立可回退、可审批、可复用的教材证书设计项目。成品默认只生成唯一主标题；姓名、正文、日期、学校、签名和印章留给后期叠加。
 
-## 必须先执行的模式菜单
+## 智能启动与模式菜单
 
-每次开始新的 Skill 工作或建立新项目时，无论用户是否已经上传图片、说明图片类型或写明期望模式，都只输出以下固定菜单：
+先读取 [references/start-routing-rules.md](references/start-routing-rules.md)，或运行 `scripts/start_router.py`。用户只说开始工作、没有明确模式或表达冲突时，只输出以下固定菜单：
 
 ```text
 请选择工作模式：
@@ -21,12 +21,12 @@ metadata:
 请回复 1 或 2。
 ```
 
-- 不得在菜单前后增加模式介绍、流程说明、推荐语、图片分析结果或其他问题。
-- 用户明确回复 `1` 或 `2` 前，不分析图片、不创建项目、不询问标题、不读取模式专属 reference 或 prompt，也不生图。
-- 回复不是明确的 `1` 或 `2` 时，原样重新显示固定菜单，不推断模式。
-- 回复 `1` 后锁定 `selected_mode=textbook_cover`。若当前对话已有用户上传的教材封面，直接使用；否则只问：`请上传教材封面。`
-- 回复 `2` 后锁定 `selected_mode=template_bidirectional`。若当前对话已有用户上传的现成证书模板，直接使用；否则只问：`请上传现成横版或竖版证书模板。`
+- 显示菜单时不得在前后增加介绍、推荐、图片分析或其他问题。用户明确回复 `1` 或 `2` 前，不分析图片、不创建项目、不询问标题、不读取模式专属 reference 或 prompt，也不生图。
+- 用户已明确写出“模式 1”或“教材封面生成证书”时直接锁定 `selected_mode=textbook_cover`，不重复菜单；缺封面时只问：`请上传教材封面。`
+- 用户已明确写出“模式 2”或“现成模板双向转换”时直接锁定 `selected_mode=template_bidirectional`，不重复菜单；缺模板时只问：`请上传现成横版或竖版证书模板。`
+- 用户同一条消息已经给出模式、图片和标题时一次接收，不重复询问；表达冲突或不明确时原样显示菜单。
 - 模式锁定后，本项目后续步骤不重复显示菜单。只有用户明确要求重新开始、切换模式或建立新项目时，才再次显示菜单。
+- 已有项目中的“继续”按 manifest 恢复，不重复菜单和有效分析。
 - 初始化项目时必须把已锁定模式写入 manifest 的 `selected_mode`。切换模式必须新建对应模式项目，不复用另一模式的分析、manifest 或候选图。
 
 `textbook_cover` 执行“教材证书模式”。`template_bidirectional` 读取 [references/template-bidirectional-workflow.md](references/template-bidirectional-workflow.md)，执行“模板双向生成模式”；该模式不要求教材封面、教材 Style DNA 或三方案探索，先审批方向由源模板方向决定。
