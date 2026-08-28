@@ -2,6 +2,33 @@
 
 All notable changes to this project are documented here.
 
+## [1.7.0] - 2026-08-28
+
+### Added
+
+- Quality-managed landscape exploration: three internal concepts are scored, with only the best qualified result shown by default.
+- Six structured title families and a mandatory two-line or arc/double-ribbon layout for `CERTIFICATE OF COMPLETION`.
+- Deterministic title planning, rendering, validation, and one targeted title repair.
+- Bundled OFL fonts with an immutable font manifest and glyph-aware fallback.
+- Character identity evidence reports as a hard gate before visual scoring.
+- Stage-scoped active-context packs, dependency-aware source caches, and execution metrics.
+- Dual-orientation title derivatives from approved landscape and portrait Masters.
+- Non-destructive migration for legacy textbook and bidirectional-template projects.
+- A complete public-release validator covering tests, packaging, and isolated installation.
+
+### Changed
+
+- New textbook manifests use version 1.5, template manifests use version 1.3, and generation configs use version 1.4.
+- Each orientation permits at most one automatic repair before the workflow pauses.
+- Title ribbons, arcs, and illustrated bases are allowed only for the unique main title; variable-information containers remain forbidden.
+- The normal workflow asks only for mode, a missing title, and explicit approval of each orientation.
+- CI delegates to the complete public-release validator to avoid duplicated validation work.
+
+### Compatibility
+
+- Legacy schema versions remain readable.
+- Migration creates an in-project backup before writing and marks Masters without current verification evidence as `legacy_unverified`.
+
 ## [1.6.0] - 2026-08-28
 
 ### Added

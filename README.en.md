@@ -4,21 +4,24 @@
 
 Certificate Template Studio is a Codex skill for building certificate and award-template workflows that are reviewable, reversible, and reusable.
 
-It supports two modes: creating a certificate system from a textbook cover, or faithfully rebuilding an existing landscape or portrait certificate template into approved masters for both orientations. The workflow includes a mandatory mode menu, Style DNA and Template DNA, character identity locking, three concept directions, explicit approval gates, revision history, rollback, and multi-title reuse.
+It supports two modes: creating a certificate system from a textbook cover, or faithfully rebuilding an existing landscape or portrait certificate template into approved masters for both orientations. Version 1.7 uses quality-managed generation by default: it compares three landscape concepts internally, submits only the best qualified result, allows at most one automatic repair per orientation, and reduces repeated work through stage-scoped context, hash-based caching, and dual-master title derivatives.
 
 ## Highlights
 
 - Two explicit modes: textbook-cover creation and bidirectional template rebuilding.
 - Character identity locks for facial features, hair, clothing, accessories, species, and proportions.
-- Three genuinely different landscape concepts in textbook mode, including a full-frame option.
+- Three genuinely different landscape concepts evaluated internally, including a full-frame option; only the best qualified result is shown by default.
 - Fresh composition for each orientation—never rotate, stretch, crop, or mechanically extend an image.
 - Exact mini-program PNG output: `2172 × 1536 px` landscape and `1536 × 2172 px` portrait.
-- Three title modes: deterministic flat color, deterministic styled effects, or validated AI-integrated lettering.
+- Six title families: formal two-tier, modern two-tier, ceremonial arc, double ribbon, playful children, and illustrated integration.
+- `CERTIFICATE OF COMPLETION` is always arranged as two semantic lines or an equivalent arc/double-ribbon hierarchy.
+- Three rendering paths underneath those families: clean vector flat color, deterministic vector effects, or validated AI-integrated lettering.
 - A finalization report gate covering dimensions, ratio handling, title centering, artifact hash, and title validation.
 - Separate user approval for landscape and portrait masters.
 - LEVEL1/2/3 revisions with non-destructive history and rollback.
 - Structured Style DNA, Template DNA, manifests, revision logs, and JSON Schemas.
-- Reuse of approved landscape and portrait masters for new titles.
+- Reuse of both approved masters for new titles without repeating three-concept exploration.
+- Stage-scoped context, dependency-aware cache invalidation, and execution metrics.
 
 ## Start
 
@@ -40,6 +43,8 @@ The skill always begins with this mode menu:
 
 The Chinese menu is intentionally fixed because the current workflow is designed for Chinese-language interaction.
 
+In the normal path, user input is needed only to choose a mode, provide a missing title, explicitly approve the landscape result, and explicitly approve the portrait result. The workflow pauses again only when its single automatic repair still cannot pass a quality gate. Ask to “查看其他方案” to reveal other qualified internal candidates.
+
 ## Install
 
 macOS / Linux:
@@ -59,6 +64,12 @@ git clone https://github.com/liuxiaoliu2019/certificate-template-studio.git `
 Alternatively, clone or download the repository and run `install.ps1` on Windows or `install.sh` on macOS/Linux. Existing non-empty installations are never overwritten silently. With `-Force` or `--force`, the installer first moves the old installation to a timestamped backup.
 
 Release archives are available from [GitHub Releases](https://github.com/liuxiaoliu2019/certificate-template-studio/releases).
+
+Legacy projects can be upgraded non-destructively with:
+
+```bash
+python scripts/migrate_project.py <project-directory>
+```
 
 ## Requirements
 
@@ -80,7 +91,7 @@ python scripts/quick_validate.py .
 python scripts/public_release_validate.py .
 ```
 
-The public validator also checks the exact output dimensions, title modes, finalization reports, example schemas, control-map hashes, and release-safety rules.
+The public validator is the one-command release gate. It checks example schemas, control and font hashes, both workflows, exact output dimensions, title rules, state and approval gates, the full test suite, deterministic ZIP packaging, an isolated installer run, and public-release safety.
 
 ## Licensing
 
