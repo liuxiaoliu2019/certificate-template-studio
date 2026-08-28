@@ -1,12 +1,20 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.5",
+  "selected_mode": "textbook_cover",
   "project_id": "sunny-farm-course",
   "textbook_key": "SunnyFarmCourse",
   "created_at": "2026-08-25T00:00:00Z",
   "updated_at": "2026-08-25T00:10:00Z",
   "source_cover": "input/cover-not-included.jpg",
   "style_dna_path": "analysis/style_dna.json",
+  "character_identity_path": "analysis/character_identity.json",
+  "character_reference_dir": "analysis/character_refs",
   "current_title": "英语之星",
+  "output_contract": {
+    "landscape": {"width_px": 2172, "height_px": 1536},
+    "portrait": {"width_px": 1536, "height_px": 2172},
+    "format": "PNG", "purpose": "mini_program", "ratio_tolerance_percent": 0.5
+  },
   "workflow": { "stage": "awaiting_landscape_approval" },
   "controls": {
     "landscape": "controls/landscape_v3.png",
@@ -22,15 +30,23 @@
       "concepts/landscape_03-not-included.png"
     ],
     "selected_file": "revisions/landscape_r001-not-included.png",
-    "active_revision_id": "r001"
+    "active_revision_id": "r001",
+    "finalization_report": null
   },
   "portrait": {
     "status": "blocked",
     "concepts": [],
     "selected_file": null,
-    "active_revision_id": null
+    "active_revision_id": null,
+    "finalization_report": null
   },
-  "master": { "landscape": null, "portrait": null, "title": null },
+  "style_engine": {
+    "status": "selected", "recommendation_path": "analysis/style_recommendation.json",
+    "candidate_profiles": ["styles/candidate-1.json", "styles/candidate-2.json", "styles/candidate-3.json"],
+    "selected_profile": "styles/candidate-2.json", "approved_profile": null,
+    "master_profile_path": null, "style_lock": "family_locked"
+  },
+  "master": { "landscape": null, "portrait": null, "title": null, "style_profile": null },
   "derivatives": [],
   "approvals": [],
   "revision_log_path": "revisions/revision_log.json"

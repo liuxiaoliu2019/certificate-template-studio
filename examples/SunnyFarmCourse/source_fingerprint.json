@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "mode": "textbook_cover",
+  "source": {"path": "input/cover-not-included.jpg", "sha256": "1111111111111111111111111111111111111111111111111111111111111111"},
+  "controls": {
+    "landscape": {"path": "controls/landscape_v3.png", "sha256": "2222222222222222222222222222222222222222222222222222222222222222"},
+    "portrait": {"path": "controls/portrait_v3.png", "sha256": "3333333333333333333333333333333333333333333333333333333333333333"}
+  },
+  "characters": {},
+  "updated_at": "2026-08-28T00:00:00Z"
+}

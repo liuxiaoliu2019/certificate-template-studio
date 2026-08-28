@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "title": "CERTIFICATE OF COMPLETION",
+  "slug": "certificate-of-completion",
+  "source_masters": {
+    "landscape": {
+      "path": "selected/master_landscape-not-included.png",
+      "sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    "portrait": {
+      "path": "selected/master_portrait-not-included.png",
+      "sha256": "6666666666666666666666666666666666666666666666666666666666666666"
+    }
+  },
+  "title_family": "double_ribbon",
+  "outputs": {
+    "landscape": {
+      "image": {
+        "path": "derivatives/certificate-of-completion/landscape.png",
+        "sha256": "7777777777777777777777777777777777777777777777777777777777777777"
+      },
+      "report": {
+        "path": "derivatives/certificate-of-completion/landscape.finalization.json",
+        "sha256": "8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "title_plan": {
+        "path": "derivatives/certificate-of-completion/landscape.title-plan.json",
+        "sha256": "9999999999999999999999999999999999999999999999999999999999999999"
+      }
+    },
+    "portrait": {
+      "image": {
+        "path": "derivatives/certificate-of-completion/portrait.png",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "report": {
+        "path": "derivatives/certificate-of-completion/portrait.finalization.json",
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "title_plan": {
+        "path": "derivatives/certificate-of-completion/portrait.title-plan.json",
+        "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    }
+  },
+  "created_at": "2026-08-28T00:20:00Z"
+}

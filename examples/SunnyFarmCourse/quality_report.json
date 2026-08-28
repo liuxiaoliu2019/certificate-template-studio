@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "orientation": "landscape",
+  "candidates": [
+    {
+      "candidate_id": "candidate-2",
+      "artifact": {
+        "path": "concepts/landscape_02-not-included.png",
+        "sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+      },
+      "scores": {
+        "style_dna": 18,
+        "certificate_style": 18,
+        "composition": 18,
+        "title": 14,
+        "safe_zones": 9,
+        "orientation_consistency": 9,
+        "text_cleanliness": 5
+      },
+      "total": 91,
+      "hard_failures": [],
+      "qualified": true,
+      "used_character_ids": ["boy_explorer", "girl_explorer"],
+      "character_identity_reports": [
+        "analysis/identity_reports/candidate-2-boy.json",
+        "analysis/identity_reports/candidate-2-girl.json"
+      ]
+    }
+  ],
+  "selected_candidate_id": "candidate-2",
+  "action": "submit_best",
+  "default_visible_candidate_ids": ["candidate-2"],
+  "other_qualified_candidate_ids": [],
+  "created_at": "2026-08-28T00:10:00Z"
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "title": "CERTIFICATE OF COMPLETION",
+  "normalized_title": "CERTIFICATE OF COMPLETION",
+  "language": "en",
+  "orientation": "landscape",
+  "layout_family": "double_ribbon",
+  "render_mode": "vector_effect",
+  "center_x_percent": 50,
+  "width_percent": 62,
+  "portrait_up_shift_px": 0,
+  "container": {"type": "double_ribbon", "title_only": true},
+  "lines": [
+    {"text": "CERTIFICATE", "role": "primary", "size_ratio": 1, "tracking_em": 0.05, "baseline_offset_em": 0, "path": "ribbon"},
+    {"text": "OF COMPLETION", "role": "secondary", "size_ratio": 0.52, "tracking_em": 0.16, "baseline_offset_em": 0, "path": "ribbon"}
+  ],
+  "font_roles": {"primary": "ceremonial_display", "secondary": "modern_sans"},
+  "created_at": "2026-08-28T00:00:00Z"
+}

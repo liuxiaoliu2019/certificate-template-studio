@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "counters": {
+    "analysis_calls": 1, "planning_calls": 1, "three_concept_generations": 1,
+    "image_generation_calls": 3, "visual_review_calls": 3, "auto_repair_calls": 0,
+    "cache_hits": 1, "cache_misses": 2, "context_builds": 3, "references_loaded": 5,
+    "prompt_chars": 9200, "image_inputs": 8, "user_pauses": 1, "title_derivatives": 0
+  },
+  "events": [],
+  "updated_at": "2026-08-28T00:00:00Z"
+}

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.3",
   "mode": "template_bidirectional",
   "selected_mode": "template_bidirectional",
   "project_id": "classic-blue-bidirectional",
@@ -15,8 +15,13 @@
   },
   "template_dna_path": "analysis/template_dna.json",
   "current_title": "结业证书",
+  "output_contract": {
+    "landscape": {"width_px": 2172, "height_px": 1536},
+    "portrait": {"width_px": 1536, "height_px": 2172},
+    "format": "PNG", "purpose": "mini_program", "ratio_tolerance_percent": 0.5
+  },
   "workflow": {
-    "stage": "source_approved"
+    "stage": "deriving_opposite"
   },
   "source_lock": {
     "status": "source_locked",
@@ -31,13 +36,15 @@
     "status": "approved",
     "concepts": ["landscape/source-regenerated-not-included.png"],
     "selected_file": "landscape/source-regenerated-not-included.png",
-    "active_revision_id": null
+    "active_revision_id": null,
+    "finalization_report": null
   },
   "portrait": {
     "status": "ready",
     "concepts": [],
     "selected_file": null,
-    "active_revision_id": null
+    "active_revision_id": null,
+    "finalization_report": null
   },
   "master": {
     "landscape": "landscape/source-regenerated-not-included.png",
