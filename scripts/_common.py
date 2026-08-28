@@ -1,34 +1,27 @@
 from __future__ import annotations
 
-import hashlib
 import json
-import os
 import re
-import tempfile
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from project_io import (
+    atomic_write_json,
+    load_json,
+    relative_posix,
+    resolve_project_path,
+    sha256_file,
+)
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
-def load_json(path: Path) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
-
-
 def save_json(path: Path, value: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    payload = json.dumps(value, ensure_ascii=False, indent=2) + "\n"
-    with tempfile.NamedTemporaryFile(
-        "w", encoding="utf-8", newline="\n", delete=False, dir=path.parent
-    ) as handle:
-        handle.write(payload)
-        temp_name = handle.name
-    os.replace(temp_name, path)
+    atomic_write_json(path, value)
 
 
 def safe_slug(value: str) -> str:
@@ -42,24 +35,8 @@ def safe_slug(value: str) -> str:
     return slug
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def relative_posix(path: Path, root: Path) -> str:
-    return path.resolve().relative_to(root.resolve()).as_posix()
-
-
 def project_file(project: Path, relative: str) -> Path:
-    candidate = (project / relative).resolve()
-    root = project.resolve()
-    if candidate != root and root not in candidate.parents:
-        raise ValueError(f"路径必须位于项目目录内：{relative}")
-    return candidate
+    return resolve_project_path(project, relative)
 
 
 def parse_assignment(value: str) -> tuple[str, Any]:
