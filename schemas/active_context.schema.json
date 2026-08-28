@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/certificate-template-studio/active_context.schema.json",
+  "title": "Minimal active workflow context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "stage", "mode", "text_budget_chars", "text_chars_used", "resources", "created_at"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "stage": {"enum": ["analysis", "planning", "landscape", "revision", "portrait", "derivative", "approval"]},
+    "mode": {"enum": ["textbook_cover", "template_bidirectional"]},
+    "text_budget_chars": {"type": "integer", "minimum": 1},
+    "text_chars_used": {"type": "integer", "minimum": 0},
+    "resources": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "path", "text_chars"],
+        "properties": {
+          "kind": {"enum": ["reference", "prompt", "json", "image", "feedback"]},
+          "path": {"type": "string", "minLength": 1},
+          "text_chars": {"type": "integer", "minimum": 0},
+          "character_id": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

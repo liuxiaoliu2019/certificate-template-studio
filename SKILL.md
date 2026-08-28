@@ -53,6 +53,8 @@ metadata:
 
 JSON 输出必须符合 `schemas/` 中对应 schema。只加载当前阶段需要的 prompt 和 reference。
 
+为减少干预和上下文浪费，执行具体阶段前按 [references/context-routing.md](references/context-routing.md) 建立最小 `active_context.json`。不得把完整历史、全部 reference、未使用角色裁切或另一模式资料一起加载；相同来源与输入先检查 `configs/cache_state.json`，缓存命中时复用现有分析或成品。
+
 ## 教材证书模式：标准工作流
 
 ### 1. 初始化、Style DNA 与角色身份
