@@ -83,6 +83,7 @@
           "landscape": { "type": "string", "minLength": 1 },
           "portrait": { "type": "string", "minLength": 1 },
           "created_at": { "type": "string", "format": "date-time" }
+          ,"manifest_path": { "type": "string", "minLength": 1 }
         }
       }
     },
