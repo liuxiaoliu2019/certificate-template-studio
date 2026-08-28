@@ -16,4 +16,4 @@
 
 `source_region` 使用 0–1 归一化坐标，完整包含角色可见部分并尽量排除教材文字。看不清的特征写入 `unverified_traits`，不得猜测。
 
-只返回符合 schema 的 JSON。若封面没有可识别角色，返回空 `characters`，仍保留全局身份策略。
+只返回符合 schema 的 JSON，使用 `schema_version=1.1`，并固定 `policy.max_auto_corrections=1`。若封面没有可识别角色，返回空 `characters`，仍保留全局身份策略。

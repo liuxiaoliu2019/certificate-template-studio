@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "source_cover", "policy", "characters"],
   "properties": {
-    "schema_version": { "const": "1.0" },
+    "schema_version": { "enum": ["1.0", "1.1"] },
     "source_cover": { "type": "string", "minLength": 1 },
     "source_cover_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "policy": {
@@ -17,7 +17,7 @@
         "identity_scope": { "const": "all_human_and_animal_characters" },
         "appearance_policy": { "const": "optional_but_faithful_when_used" },
         "minimum_score": { "const": 85 },
-        "max_auto_corrections": { "const": 2 }
+        "max_auto_corrections": { "enum": [1, 2] }
       }
     },
     "characters": {
@@ -26,6 +26,16 @@
     },
     "notes": { "type": "array", "items": { "type": "string" } }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "schema_version": { "const": "1.0" } } },
+      "then": { "properties": { "policy": { "properties": { "max_auto_corrections": { "const": 2 } } } } }
+    },
+    {
+      "if": { "properties": { "schema_version": { "const": "1.1" } } },
+      "then": { "properties": { "policy": { "properties": { "max_auto_corrections": { "const": 1 } } } } }
+    }
+  ],
   "$defs": {
     "region": {
       "type": "object",

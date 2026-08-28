@@ -1,11 +1,11 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "source_cover": "input/cover-not-included.jpg",
   "policy": {
     "identity_scope": "all_human_and_animal_characters",
     "appearance_policy": "optional_but_faithful_when_used",
     "minimum_score": 85,
-    "max_auto_corrections": 2
+    "max_auto_corrections": 1
   },
   "characters": [
     {
