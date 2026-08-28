@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/certificate-template-studio/title_quality_report.schema.json",
+  "title": "Certificate title quality report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "orientation", "artifact", "layout_plan", "scores", "total",
+    "hard_failures", "issues", "qualified", "repair", "created_at"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "orientation": {"enum": ["landscape", "portrait"]},
+    "artifact": {"$ref": "#/$defs/file_record"},
+    "layout_plan": {"$ref": "#/$defs/file_record"},
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "font_match", "hierarchy", "design_quality", "balance", "readability",
+        "cross_orientation_consistency"
+      ],
+      "properties": {
+        "font_match": {"type": "integer", "minimum": 0, "maximum": 20},
+        "hierarchy": {"type": "integer", "minimum": 0, "maximum": 20},
+        "design_quality": {"type": "integer", "minimum": 0, "maximum": 20},
+        "balance": {"type": "integer", "minimum": 0, "maximum": 15},
+        "readability": {"type": "integer", "minimum": 0, "maximum": 15},
+        "cross_orientation_consistency": {"type": "integer", "minimum": 0, "maximum": 10}
+      }
+    },
+    "total": {"type": "integer", "minimum": 0, "maximum": 100},
+    "hard_failures": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "spelling_error", "missing_glyph", "wrong_semantic_break", "center_offset",
+          "low_contrast", "container_collision", "flat_noise", "extra_text"
+        ]
+      }
+    },
+    "issues": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "tracking_or_spacing", "weak_hierarchy", "font_mismatch", "missing_glyph",
+          "wrong_semantic_break", "layout_overload", "low_contrast", "container_collision",
+          "flat_noise", "spelling_error", "extra_text", "center_offset"
+        ]
+      }
+    },
+    "qualified": {"type": "boolean"},
+    "repair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempts_used", "max_attempts", "allowed", "next_action", "step"],
+      "properties": {
+        "attempts_used": {"type": "integer", "minimum": 0, "maximum": 1},
+        "max_attempts": {"const": 1},
+        "allowed": {"type": "boolean"},
+        "next_action": {"enum": ["submit", "repair", "blocked"]},
+        "step": {
+          "type": ["string", "null"],
+          "enum": [
+            "tracking_line_spacing", "size_ratio", "compatible_font",
+            "semantic_two_line", "layout_downgrade", null
+          ]
+        }
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "file_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    }
+  }
+}
