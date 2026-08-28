@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from _common import load_json, project_file, save_json, sha256_file, utc_now
+from workflow_engine import transition
 
 try:
     from PIL import Image
@@ -14,10 +15,15 @@ except ImportError as exc:  # pragma: no cover - depends on local runtime
 
 
 SAFE_STAGES = [
-    "template_analyzed",
-    "waiting_for_title",
+    "analyzing_source",
+    "awaiting_title",
     "regenerating_source",
+    "validating_source",
     "deriving_opposite",
+    "validating_opposite",
+    "revising_source",
+    "revising_opposite",
+    "blocked",
 ]
 
 
@@ -99,28 +105,16 @@ def main() -> int:
             raise ValueError("标题不能为空；标题必须来自用户手动输入")
         manifest["current_title"] = title
         if manifest["master"]["landscape"] and manifest["master"]["portrait"]:
-            manifest["workflow"]["stage"] = "deriving_title"
-        else:
-            manifest["workflow"]["stage"] = "title_confirmed"
+            transition(manifest, "deriving_title", project=project)
+        elif manifest["workflow"]["stage"] == "awaiting_title":
+            transition(manifest, "regenerating_source", project=project)
 
     elif args.stage:
-        if args.stage == "template_analyzed":
-            dna = project_file(project, manifest["template_dna_path"])
-            if not dna.is_file():
-                raise FileNotFoundError("登记 template_analyzed 前必须保存 analysis/template_dna.json")
-            manifest["workflow"]["stage"] = "template_analyzed"
-        elif args.stage == "waiting_for_title":
-            manifest["workflow"]["stage"] = "waiting_for_title"
-        elif args.stage == "regenerating_source":
-            if not manifest.get("current_title"):
-                raise ValueError("未输入用户标题，不能生成同方向版本")
+        transition(manifest, args.stage, project=project)
+        if args.stage == "regenerating_source":
             manifest[source]["status"] = "generating"
-            manifest["workflow"]["stage"] = "regenerating_source"
         elif args.stage == "deriving_opposite":
-            if manifest[source]["status"] != "approved":
-                raise ValueError("源方向未批准，不能生成另一方向")
             manifest[opposite]["status"] = "generating"
-            manifest["workflow"]["stage"] = "deriving_opposite"
 
     elif args.select_orientation:
         orientation = args.select_orientation
@@ -128,15 +122,17 @@ def main() -> int:
             raise ValueError("源方向未批准，不能选择另一方向候选")
         artifact = checked_artifact(project, args.artifact)
         report_path = None
-        if manifest.get("schema_version") == "1.2" or args.finalization_report:
+        if manifest.get("schema_version") in {"1.2", "1.3"} or args.finalization_report:
             report_path = checked_finalization_report(project, args.finalization_report, artifact, orientation)
         manifest[orientation]["selected_file"] = artifact
         if "finalization_report" in manifest[orientation]:
             manifest[orientation]["finalization_report"] = report_path
         manifest[orientation]["concepts"] = [artifact]
         manifest[orientation]["status"] = "awaiting_approval"
-        manifest["workflow"]["stage"] = (
-            "awaiting_source_approval" if orientation == source else "awaiting_opposite_approval"
+        transition(
+            manifest,
+            "awaiting_source_approval" if orientation == source else "awaiting_opposite_approval",
+            project=project,
         )
 
     elif args.approve_orientation:
@@ -150,7 +146,7 @@ def main() -> int:
             raise ValueError("源方向未批准，不能批准另一方向")
         artifact = checked_artifact(project, args.artifact)
         report_path = None
-        if manifest.get("schema_version") == "1.2" or args.finalization_report:
+        if manifest.get("schema_version") in {"1.2", "1.3"} or args.finalization_report:
             report_path = checked_finalization_report(
                 project, args.finalization_report, artifact, orientation
             )
@@ -176,12 +172,12 @@ def main() -> int:
         manifest["approvals"].append(approval)
         if orientation == source:
             if manifest[opposite]["status"] == "approved":
-                manifest["workflow"]["stage"] = "complete"
+                transition(manifest, "complete", project=project)
             else:
                 manifest[opposite]["status"] = "ready"
-                manifest["workflow"]["stage"] = "source_approved"
+                transition(manifest, "deriving_opposite", project=project)
         else:
-            manifest["workflow"]["stage"] = "complete"
+            transition(manifest, "complete", project=project)
 
     manifest["updated_at"] = utc_now()
     save_json(manifest_path, manifest)

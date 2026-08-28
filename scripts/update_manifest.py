@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from _common import load_json, parse_assignment, project_file, save_json, set_dotted, sha256_file, utc_now
+from workflow_engine import transition
 
 try:
     from PIL import Image
@@ -23,24 +24,17 @@ STYLE_FAMILIES = {
     "S07_chinese_ceremonial_award",
 }
 SAFE_STAGES = [
-    "initialized",
-    "analyzing",
+    "analyzing_source",
     "awaiting_title",
-    "exploring_landscape",
+    "planning_landscape",
+    "generating_landscape",
+    "validating_landscape",
     "revising_landscape",
-    "awaiting_landscape_approval",
     "generating_portrait",
-    "awaiting_portrait_approval",
+    "validating_portrait",
+    "revising_portrait",
     "deriving_title",
-    "style_analyzed",
-    "waiting_for_title",
-    "title_confirmed",
-    "styles_recommended",
-    "landscape_generated",
-    "landscape_selected",
-    "landscape_revising",
-    "portrait_generated",
-    "portrait_revising",
+    "blocked",
 ]
 LOCKED_PREFIXES = (
     "workflow.stage",
@@ -151,7 +145,7 @@ def register_recommendation(manifest: dict, project: Path, relative: str) -> Non
     state["selected_profile"] = None
     state["approved_profile"] = None
     state["style_lock"] = "unlocked"
-    manifest["workflow"]["stage"] = "styles_recommended"
+    transition(manifest, "generating_landscape", project=project)
 
 
 def approval_words_valid(orientation: str, words: str | None) -> bool:
@@ -212,7 +206,7 @@ def approve(
         raise ValueError(f"审批原话必须明确包含“{label}”")
     artifact = checked_artifact(project, relative)
     report_path = None
-    if manifest.get("schema_version") == "1.4" or finalization_report:
+    if manifest.get("schema_version") in {"1.4", "1.5"} or finalization_report:
         report_path = checked_finalization_report(project, finalization_report, artifact, orientation)
     if orientation == "portrait" and manifest["landscape"]["status"] != "approved":
         raise ValueError("横版未批准，不能批准竖版")
@@ -259,9 +253,9 @@ def approve(
     manifest["approvals"].append(approval)
     if orientation == "landscape":
         manifest["portrait"]["status"] = "ready"
-        manifest["workflow"]["stage"] = "landscape_approved"
+        transition(manifest, "generating_portrait", project=project)
     else:
-        manifest["workflow"]["stage"] = "complete"
+        transition(manifest, "complete", project=project)
     if profile:
         write_master_profile(manifest, project, profile)
 
@@ -279,28 +273,28 @@ def main() -> int:
         key, value = parse_assignment(assignment)
         if key.startswith(LOCKED_PREFIXES):
             raise ValueError(f"锁定字段不能用 --set 修改：{key}")
+        if key == "current_title":
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError("current_title 不能为空；标题必须来自用户手动输入")
+            value = value.strip()
         set_dotted(manifest, key, value)
         if key == "current_title":
             title_changed = True
 
     if args.stage:
-        manifest["workflow"]["stage"] = args.stage
-        if args.stage in {"style_analyzed", "waiting_for_title", "awaiting_title"} and "style_engine" in manifest:
+        transition(manifest, args.stage, project=project)
+        if args.stage == "awaiting_title" and "style_engine" in manifest:
             manifest["style_engine"]["status"] = "waiting_for_title"
-        elif args.stage == "title_confirmed" and "style_engine" in manifest:
+        elif args.stage == "planning_landscape" and "style_engine" in manifest:
             manifest["style_engine"]["status"] = "ready"
-        elif args.stage == "landscape_generated":
+        elif args.stage == "generating_landscape":
             manifest["landscape"]["status"] = "exploring"
-        elif args.stage in {"landscape_revising", "revising_landscape"}:
+        elif args.stage == "revising_landscape":
             manifest["landscape"]["status"] = "revising"
-        elif args.stage == "portrait_generated":
-            if manifest["landscape"]["status"] != "approved":
-                raise ValueError("横版未批准，不能登记竖版已生成")
-            manifest["portrait"]["status"] = "awaiting_approval"
-        elif args.stage == "portrait_revising":
-            if manifest["landscape"]["status"] != "approved":
-                raise ValueError("横版未批准，不能进入竖版修改")
-            manifest["portrait"]["status"] = "awaiting_approval"
+        elif args.stage == "generating_portrait":
+            manifest["portrait"]["status"] = "generating"
+        elif args.stage == "revising_portrait":
+            manifest["portrait"]["status"] = "revising"
     if args.register_style_recommendation:
         if "style_engine" not in manifest:
             raise ValueError("旧项目需先迁移或继续使用旧三方案流程")
@@ -309,7 +303,7 @@ def main() -> int:
         artifact = checked_artifact(project, args.select_landscape)
         manifest["landscape"]["selected_file"] = artifact
         manifest["landscape"]["status"] = "candidate_selected"
-        manifest["workflow"]["stage"] = "landscape_selected"
+        transition(manifest, "awaiting_landscape_approval", project=project)
         if "style_engine" in manifest:
             if not args.style_profile:
                 raise ValueError("新版项目选择横版时必须提供 --style-profile")
@@ -325,7 +319,7 @@ def main() -> int:
         artifact = checked_artifact(project, args.select_portrait)
         manifest["portrait"]["selected_file"] = artifact
         manifest["portrait"]["status"] = "awaiting_approval"
-        manifest["workflow"]["stage"] = "awaiting_portrait_approval"
+        transition(manifest, "awaiting_portrait_approval", project=project)
     elif args.approve_landscape:
         approve(manifest, project, "landscape", args.approve_landscape, args.user_confirmation, args.style_profile, args.finalization_report)
     elif args.approve_portrait:
@@ -337,24 +331,22 @@ def main() -> int:
         manifest["portrait"]["status"] = "stale"
         manifest["master"]["landscape"] = None
         manifest["master"]["portrait"] = None
-        manifest["workflow"]["stage"] = "landscape_revising"
+        transition(manifest, "revising_landscape", project=project)
         if "style_engine" in manifest:
             manifest["style_engine"]["approved_profile"] = None
             manifest["style_engine"]["status"] = "stale"
             manifest["style_engine"]["style_lock"] = "family_locked"
 
     if title_changed:
-        if not manifest.get("current_title"):
-            raise ValueError("current_title 不能为空；标题必须来自用户手动输入")
         generation_path = project / "configs" / "generation_config.json"
         if generation_path.is_file():
             generation = load_json(generation_path)
             generation["title"]["value"] = manifest["current_title"]
             save_json(generation_path, generation)
         if manifest.get("master", {}).get("landscape"):
-            manifest["workflow"]["stage"] = "deriving_title"
-        else:
-            manifest["workflow"]["stage"] = "title_confirmed"
+            transition(manifest, "deriving_title", project=project)
+        elif manifest["workflow"]["stage"] == "awaiting_title":
+            transition(manifest, "planning_landscape", project=project)
             if "style_engine" in manifest:
                 manifest["style_engine"]["status"] = "ready"
 

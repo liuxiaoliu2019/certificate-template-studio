@@ -9,7 +9,6 @@ from record_revision import invalidate_if_needed
 from update_manifest import approval_words_valid, checked_finalization_report
 
 
-@pytest.mark.xfail(strict=True, reason="CTS-101: whitespace-only titles are accepted")
 def test_whitespace_only_title_is_rejected(tmp_path: Path) -> None:
     project = init_textbook(tmp_path)
     result = run_script(
@@ -56,7 +55,6 @@ def test_report_title_must_match_manifest(tmp_path: Path) -> None:
         )
 
 
-@pytest.mark.xfail(strict=True, reason="CTS-104: stage labels can skip prerequisites")
 def test_landscape_generation_cannot_skip_analysis_and_title(tmp_path: Path) -> None:
     project = init_textbook(tmp_path)
     result = run_script(

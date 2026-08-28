@@ -415,6 +415,26 @@ def validate_smoke_tests(root: Path, errors: list[str]) -> None:
                 dna_source = root / "examples/TemplateBidirectional/template_dna.json"
                 dna_target = approval_project / "analysis/template_dna.json"
                 dna_target.write_text(dna_source.read_text(encoding="utf-8"), encoding="utf-8")
+                analyze_result = run(
+                    [
+                        sys.executable,
+                        "scripts/update_template_manifest.py",
+                        str(approval_project),
+                        "--stage",
+                        "analyzing_source",
+                    ],
+                    root,
+                )
+                await_title_result = run(
+                    [
+                        sys.executable,
+                        "scripts/update_template_manifest.py",
+                        str(approval_project),
+                        "--stage",
+                        "awaiting_title",
+                    ],
+                    root,
+                )
                 title_result = run(
                     [
                         sys.executable,
@@ -451,10 +471,46 @@ def validate_smoke_tests(root: Path, errors: list[str]) -> None:
                     ],
                     root,
                 )
-                if title_result.returncode != 0 or approval_finalization.returncode != 0:
+                validate_source_result = run(
+                    [
+                        sys.executable,
+                        "scripts/update_template_manifest.py",
+                        str(approval_project),
+                        "--stage",
+                        "validating_source",
+                    ],
+                    root,
+                )
+                select_source_result = run(
+                    [
+                        sys.executable,
+                        "scripts/update_template_manifest.py",
+                        str(approval_project),
+                        "--select-orientation",
+                        "landscape",
+                        "--artifact",
+                        master_relative,
+                        "--finalization-report",
+                        report_relative,
+                    ],
+                    root,
+                )
+                preparation = (
+                    analyze_result,
+                    await_title_result,
+                    title_result,
+                    approval_finalization,
+                    validate_source_result,
+                    select_source_result,
+                )
+                if any(item.returncode != 0 for item in preparation):
                     errors.append(
                         "模板批准门槛准备失败："
-                        f"{title_result.stderr or approval_finalization.stderr}"
+                        + " | ".join(
+                            item.stderr or item.stdout
+                            for item in preparation
+                            if item.returncode != 0
+                        )
                     )
                 else:
                     missing_report = run(

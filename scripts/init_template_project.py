@@ -106,7 +106,7 @@ def main() -> int:
         },
     }
     manifest = {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "mode": "template_bidirectional",
         "selected_mode": "template_bidirectional",
         "project_id": project_id,

@@ -131,7 +131,7 @@ def main() -> int:
         },
     }
     manifest = {
-        "schema_version": "1.4",
+        "schema_version": "1.5",
         "selected_mode": "textbook_cover",
         "project_id": project_id,
         "textbook_key": args.name,

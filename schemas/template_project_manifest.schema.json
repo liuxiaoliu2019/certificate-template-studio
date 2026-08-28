@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "mode", "project_id", "display_name", "created_at", "updated_at", "source_template", "source_orientation", "opposite_orientation", "source_dimensions", "template_dna_path", "current_title", "workflow", "source_lock", "controls", "landscape", "portrait", "master", "derivatives", "approvals", "revision_log_path"],
   "properties": {
-    "schema_version": { "enum": ["1.0", "1.1", "1.2"] },
+    "schema_version": { "enum": ["1.0", "1.1", "1.2", "1.3"] },
     "mode": { "const": "template_bidirectional" },
     "selected_mode": { "const": "template_bidirectional" },
     "project_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
@@ -33,7 +33,7 @@
       "additionalProperties": false,
       "required": ["stage"],
       "properties": {
-        "stage": { "enum": ["initialized", "template_analyzed", "waiting_for_title", "title_confirmed", "regenerating_source", "awaiting_source_approval", "source_approved", "deriving_opposite", "awaiting_opposite_approval", "revising", "complete", "deriving_title"] }
+        "stage": { "enum": ["initialized", "template_analyzed", "waiting_for_title", "title_confirmed", "regenerating_source", "validating_source", "awaiting_source_approval", "source_approved", "deriving_opposite", "validating_opposite", "awaiting_opposite_approval", "revising", "revising_source", "revising_opposite", "analyzing_source", "awaiting_title", "blocked", "complete", "deriving_title"] }
       }
     },
     "source_lock": {
@@ -112,6 +112,23 @@
       "then": {
         "required": ["selected_mode", "output_contract"],
         "properties": {
+          "landscape": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] },
+          "portrait": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "schema_version": { "const": "1.3" } } },
+      "then": {
+        "required": ["selected_mode", "output_contract"],
+        "properties": {
+          "workflow": {
+            "properties": {
+              "stage": {
+                "enum": ["initialized", "analyzing_source", "awaiting_title", "regenerating_source", "validating_source", "awaiting_source_approval", "revising_source", "deriving_opposite", "validating_opposite", "awaiting_opposite_approval", "revising_opposite", "deriving_title", "blocked", "complete"]
+              }
+            }
+          },
           "landscape": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] },
           "portrait": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] }
         }

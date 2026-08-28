@@ -23,7 +23,7 @@
     "revision_log_path"
   ],
   "properties": {
-    "schema_version": { "enum": ["1.0", "1.1", "1.2", "1.3", "1.4"] },
+    "schema_version": { "enum": ["1.0", "1.1", "1.2", "1.3", "1.4", "1.5"] },
     "selected_mode": { "const": "textbook_cover" },
     "project_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
     "textbook_key": { "type": "string", "minLength": 1 },
@@ -64,6 +64,13 @@
             "portrait_generated",
             "portrait_revising",
             "portrait_approved"
+            ,"analyzing_source"
+            ,"planning_landscape"
+            ,"generating_landscape"
+            ,"validating_landscape"
+            ,"revising_portrait"
+            ,"validating_portrait"
+            ,"blocked"
           ]
         }
       }
@@ -152,11 +159,11 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "schema_version": { "enum": ["1.2", "1.3", "1.4"] } } },
+      "if": { "properties": { "schema_version": { "enum": ["1.2", "1.3", "1.4", "1.5"] } } },
       "then": { "required": ["character_identity_path", "character_reference_dir", "style_engine"] }
     },
     {
-      "if": { "properties": { "schema_version": { "enum": ["1.3", "1.4"] } } },
+      "if": { "properties": { "schema_version": { "enum": ["1.3", "1.4", "1.5"] } } },
       "then": { "required": ["selected_mode"] }
     },
     {
@@ -164,6 +171,23 @@
       "then": {
         "required": ["output_contract"],
         "properties": {
+          "landscape": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] },
+          "portrait": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "schema_version": { "const": "1.5" } } },
+      "then": {
+        "required": ["output_contract"],
+        "properties": {
+          "workflow": {
+            "properties": {
+              "stage": {
+                "enum": ["initialized", "analyzing_source", "awaiting_title", "planning_landscape", "generating_landscape", "validating_landscape", "awaiting_landscape_approval", "revising_landscape", "generating_portrait", "validating_portrait", "awaiting_portrait_approval", "revising_portrait", "deriving_title", "blocked", "complete"]
+              }
+            }
+          },
           "landscape": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] },
           "portrait": { "required": ["status", "concepts", "selected_file", "active_revision_id", "finalization_report"] }
         }
