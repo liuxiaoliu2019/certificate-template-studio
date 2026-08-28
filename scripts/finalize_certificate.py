@@ -7,17 +7,20 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 try:
-    from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
+    from PIL import Image, ImageOps
 except ImportError as exc:  # pragma: no cover - depends on local runtime
-    raise SystemExit("缺少 Pillow。请先安装 Pillow。") from exc
+    raise SystemExit("缺少 Pillow。请先安装 requirements.txt 中的运行依赖。") from exc
+
+from font_registry import FontRegistry
+from schema_runtime import validate_document
+from title_planner import LAYOUT_FAMILIES, build_plan, normalize_title
+from title_renderer import render_title_plan
 
 
-TARGETS = {
-    "landscape": (2172, 1536),
-    "portrait": (1536, 2172),
-}
+TARGETS = {"landscape": (2172, 1536), "portrait": (1536, 2172)}
 RATIO_TOLERANCE_PERCENT = 0.5
 PORTRAIT_UP_SHIFT_PX = 110
 
@@ -55,93 +58,19 @@ def display_path(path: Path, project_root: Path | None) -> str:
     return str(resolved)
 
 
-def find_font(explicit: Path | None, hint: str) -> Path:
-    if explicit:
-        path = explicit.expanduser().resolve()
-        if not path.is_file():
-            raise FileNotFoundError(f"找不到字体文件：{path}")
-        return path
-
-    bold = "bold" in hint.casefold() or "heavy" in hint.casefold()
-    names = [
-        "msyhbd.ttc" if bold else "msyh.ttc",
-        "simhei.ttf",
-        "arialbd.ttf" if bold else "arial.ttf",
-    ]
-    roots = [
-        Path("C:/Windows/Fonts"),
-        Path("/System/Library/Fonts"),
-        Path("/Library/Fonts"),
-        Path("/usr/share/fonts/opentype/noto"),
-        Path("/usr/share/fonts/truetype/noto"),
-    ]
-    unix_names = [
-        "NotoSansCJK-Bold.ttc" if bold else "NotoSansCJK-Regular.ttc",
-        "NotoSans-Bold.ttf" if bold else "NotoSans-Regular.ttf",
-        "PingFang.ttc",
-    ]
-    for root in roots:
-        for name in names + unix_names:
-            candidate = root / name
-            if candidate.is_file():
-                return candidate.resolve()
-    raise FileNotFoundError("找不到可用字体。程序标题模式必须使用 --font 指定字体文件。")
+def display_font_path(path: Path, source: str, project_root: Path | None) -> str:
+    if source == "bundled":
+        skill_root = Path(__file__).resolve().parents[1]
+        return path.resolve().relative_to(skill_root).as_posix()
+    return display_path(path, project_root)
 
 
-def split_two_lines(title: str) -> str:
-    if " " in title.strip():
-        words = title.split()
-        if len(words) > 1:
-            candidates = [
-                (" ".join(words[:index]), " ".join(words[index:]))
-                for index in range(1, len(words))
-            ]
-            left, right = min(candidates, key=lambda pair: abs(len(pair[0]) - len(pair[1])))
-            return f"{left}\n{right}"
-    midpoint = (len(title) + 1) // 2
-    if midpoint <= 0 or midpoint >= len(title):
-        return title
-    return f"{title[:midpoint]}\n{title[midpoint:]}"
-
-
-def text_bbox(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTypeFont, spacing: int, stroke: int) -> tuple[int, int, int, int]:
-    return draw.multiline_textbbox(
-        (0, 0), text, font=font, spacing=spacing, align="center", stroke_width=stroke
-    )
-
-
-def fit_title(
-    title: str,
-    font_path: Path,
-    max_width: int,
-    max_height: int,
-    stroke: int,
-) -> tuple[str, ImageFont.FreeTypeFont, int, tuple[int, int, int, int]]:
-    probe = ImageDraw.Draw(Image.new("L", (8, 8)))
-    minimum = max(24, int(max_height * 0.22))
-    maximum = max(minimum, int(max_height * 1.2))
-
-    def find(text: str) -> tuple[ImageFont.FreeTypeFont, int, tuple[int, int, int, int]] | None:
-        for size in range(maximum, minimum - 1, -2):
-            font = ImageFont.truetype(str(font_path), size=size)
-            spacing = max(4, int(size * 0.16))
-            bbox = text_bbox(probe, text, font, spacing, stroke)
-            if bbox[2] - bbox[0] <= max_width and bbox[3] - bbox[1] <= max_height:
-                return font, spacing, bbox
-        return None
-
-    fitted = find(title)
-    if fitted:
-        return title, *fitted
-    two_lines = split_two_lines(title)
-    if two_lines != title:
-        fitted = find(two_lines)
-        if fitted:
-            return two_lines, *fitted
-    raise ValueError("标题过长，无法在最多两行内安全排版；请缩短标题或指定更紧凑的字体。")
-
-
-def crop_box(width: int, height: int, target_width: int, target_height: int) -> tuple[int, int, int, int, float]:
+def crop_box(
+    width: int,
+    height: int,
+    target_width: int,
+    target_height: int,
+) -> tuple[int, int, int, int, float]:
     source_ratio = width / height
     target_ratio = target_width / target_height
     error = abs(source_ratio - target_ratio) / target_ratio * 100
@@ -160,116 +89,22 @@ def crop_box(width: int, height: int, target_width: int, target_height: int) -> 
     return *box, error
 
 
-def title_geometry(orientation: str, canvas: tuple[int, int]) -> tuple[int, int, int, int]:
-    width, height = canvas
-    if orientation == "landscape":
-        return width // 2, round(height * 0.165), round(width * 0.42), round(height * 0.09)
-    return width // 2, round(height * 0.135), round(width * 0.52), round(height * 0.09)
-
-
-def render_title(
-    image: Image.Image,
-    orientation: str,
-    title: str,
-    mode: str,
-    font_path: Path,
-    colors: list[tuple[int, int, int, int]],
-    outline_color: tuple[int, int, int, int] | None,
-    outline_width: int,
-    shadow_color: tuple[int, int, int, int] | None,
-    shadow_offset: tuple[int, int],
-    shadow_blur: int,
-) -> tuple[Image.Image, list[int], float]:
-    center_x, center_y, max_width, max_height = title_geometry(orientation, image.size)
-    lines, font, spacing, base_bbox = fit_title(title, font_path, max_width, max_height, outline_width)
-    bbox_center_x = (base_bbox[0] + base_bbox[2]) / 2
-    bbox_center_y = (base_bbox[1] + base_bbox[3]) / 2
-    position = (round(center_x - bbox_center_x), round(center_y - bbox_center_y))
-    shifted_bbox = [
-        round(base_bbox[0] + position[0]),
-        round(base_bbox[1] + position[1]),
-        round(base_bbox[2] + position[0]),
-        round(base_bbox[3] + position[1]),
-    ]
-    center_error = abs(((shifted_bbox[0] + shifted_bbox[2]) / 2) - (image.width / 2))
-    if center_error > 1:
-        raise ValueError(f"标题水平中心误差 {center_error:.2f}px 超过 1px")
-
-    result = image.convert("RGBA")
-    if shadow_color and (shadow_offset != (0, 0) or shadow_blur > 0):
-        shadow = Image.new("RGBA", result.size, (0, 0, 0, 0))
-        shadow_draw = ImageDraw.Draw(shadow)
-        shadow_position = (position[0] + shadow_offset[0], position[1] + shadow_offset[1])
-        shadow_draw.multiline_text(
-            shadow_position,
-            lines,
-            font=font,
-            fill=shadow_color,
-            spacing=spacing,
-            align="center",
-            stroke_width=outline_width,
-            stroke_fill=shadow_color,
-        )
-        if shadow_blur:
-            shadow = shadow.filter(ImageFilter.GaussianBlur(shadow_blur))
-        result = Image.alpha_composite(result, shadow)
-
-    if mode == "vector_flat":
-        ImageDraw.Draw(result).multiline_text(
-            position,
-            lines,
-            font=font,
-            fill=colors[0],
-            spacing=spacing,
-            align="center",
-            stroke_width=outline_width,
-            stroke_fill=outline_color or colors[0],
-        )
-    else:
-        if outline_width:
-            ImageDraw.Draw(result).multiline_text(
-                position,
-                lines,
-                font=font,
-                fill=colors[0],
-                spacing=spacing,
-                align="center",
-                stroke_width=outline_width,
-                stroke_fill=outline_color or colors[-1],
-            )
-        mask = Image.new("L", result.size, 0)
-        ImageDraw.Draw(mask).multiline_text(
-            position, lines, font=font, fill=255, spacing=spacing, align="center"
-        )
-        gradient = Image.new("RGBA", result.size)
-        gradient_draw = ImageDraw.Draw(gradient)
-        stops = colors if len(colors) > 1 else [colors[0], colors[0]]
-        top, bottom = shifted_bbox[1], max(shifted_bbox[1] + 1, shifted_bbox[3])
-        for y in range(max(0, top), min(result.height, bottom + 1)):
-            progress = (y - top) / max(1, bottom - top)
-            scaled = progress * (len(stops) - 1)
-            index = min(len(stops) - 2, int(scaled))
-            fraction = scaled - index
-            color = tuple(round(stops[index][channel] * (1 - fraction) + stops[index + 1][channel] * fraction) for channel in range(4))
-            gradient_draw.line(
-                (max(0, shifted_bbox[0]), y, min(result.width - 1, shifted_bbox[2]), y),
-                fill=color,
-            )
-        result = Image.composite(gradient, result, mask)
-    return result, shifted_bbox, center_error
-
-
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="把证书原始生图收尾为固定小程序尺寸。")
+    parser = argparse.ArgumentParser(description="把证书底图收尾为固定小程序尺寸并渲染唯一主标题。")
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--report", type=Path)
     parser.add_argument("--project-root", type=Path)
     parser.add_argument("--orientation", required=True, choices=sorted(TARGETS))
     parser.add_argument("--title", required=True)
-    parser.add_argument("--title-mode", required=True, choices=["vector_flat", "vector_effect", "ai_integrated"])
+    parser.add_argument(
+        "--title-mode", required=True, choices=["vector_flat", "vector_effect", "ai_integrated"]
+    )
+    parser.add_argument("--title-plan", type=Path)
+    parser.add_argument("--layout-family", choices=LAYOUT_FAMILIES)
+    parser.add_argument("--style-family")
     parser.add_argument("--font", type=Path)
-    parser.add_argument("--font-style-hint", default="display_sans")
+    parser.add_argument("--font-style-hint", default="display_sans", help=argparse.SUPPRESS)
     parser.add_argument("--fill-color", action="append", default=[])
     parser.add_argument("--outline-color")
     parser.add_argument("--outline-width", type=int, default=0)
@@ -279,6 +114,39 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-text-free", action="store_true")
     parser.add_argument("--ai-title-validated", action="store_true")
     return parser.parse_args()
+
+
+def load_or_build_plan(
+    args: argparse.Namespace,
+    title: str,
+    output: Path,
+    report: Path,
+) -> tuple[dict[str, Any], Path]:
+    if args.title_plan:
+        path = args.title_plan.expanduser().resolve()
+        if not path.is_file():
+            raise FileNotFoundError(f"找不到标题布局计划：{path}")
+        plan = json.loads(path.read_text(encoding="utf-8"))
+        validate_document(plan, "title_layout_plan.schema.json")
+    else:
+        plan = build_plan(
+            title,
+            args.orientation,
+            style_family=args.style_family,
+            layout_family=args.layout_family,
+            render_mode=args.title_mode,
+        )
+        path = report.with_name(f"{output.stem}.title-layout.json")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    if plan["orientation"] != args.orientation:
+        raise ValueError("标题布局计划方向与 --orientation 不一致")
+    if plan["render_mode"] != args.title_mode:
+        raise ValueError("标题布局计划渲染模式与 --title-mode 不一致")
+    if plan["normalized_title"] != normalize_title(title):
+        raise ValueError("标题布局计划内容与 --title 不一致")
+    return plan, path
 
 
 def main() -> int:
@@ -291,9 +159,7 @@ def main() -> int:
         raise FileNotFoundError(f"找不到输入图片：{source}")
     if output.suffix.lower() != ".png":
         raise ValueError("正式成品必须使用 .png 扩展名")
-    title = args.title.strip()
-    if not title:
-        raise ValueError("标题不能为空")
+    title = normalize_title(args.title)
     if args.title_mode in {"vector_flat", "vector_effect"} and not args.base_text_free:
         raise ValueError("程序标题模式必须先确认底图无文字，并传入 --base-text-free")
     if args.title_mode == "ai_integrated" and not args.ai_title_validated:
@@ -301,11 +167,12 @@ def main() -> int:
     if args.outline_width < 0 or args.shadow_blur < 0:
         raise ValueError("描边宽度和阴影模糊不能为负数")
     try:
-        shadow_offset = tuple(int(item.strip()) for item in args.shadow_offset.split(","))
+        offset_items = tuple(int(item.strip()) for item in args.shadow_offset.split(","))
     except ValueError as exc:
         raise ValueError("--shadow-offset 必须为 x,y 两个整数") from exc
-    if len(shadow_offset) != 2:
+    if len(offset_items) != 2:
         raise ValueError("--shadow-offset 必须为 x,y 两个整数")
+    shadow_offset = (offset_items[0], offset_items[1])
 
     target = TARGETS[args.orientation]
     with Image.open(source) as opened:
@@ -315,30 +182,39 @@ def main() -> int:
     left, top, right, bottom, ratio_error = crop_box(*original_size, *target)
     image = image.crop((left, top, right, bottom)).resize(target, Image.Resampling.LANCZOS)
 
-    font_path: Path | None = None
     title_bbox: list[int] | None = None
     center_error: float | None = None
+    title_plan: dict[str, Any] | None = None
+    title_plan_path: Path | None = None
+    title_plan_sha256: str | None = None
+    font_evidence: list[dict[str, Any]] = []
     if args.title_mode != "ai_integrated":
-        font_path = find_font(args.font, args.font_style_hint)
-        default_colors = ["#1F4E79"] if args.title_mode == "vector_flat" else ["#FFF3A6", "#D4AF37", "#7A4E00"]
+        title_plan, title_plan_path = load_or_build_plan(args, title, output, report)
+        title_plan_sha256 = sha256_file(title_plan_path)
+        default_colors = (
+            ["#1F4E79"]
+            if args.title_mode == "vector_flat"
+            else ["#FFF3A6", "#D4AF37", "#7A4E00"]
+        )
         colors = [parse_hex(value) for value in (args.fill_color or default_colors)]
         if args.title_mode == "vector_flat" and len(colors) != 1:
             raise ValueError("vector_flat 只允许一个 --fill-color")
-        outline_color = parse_hex(args.outline_color) if args.outline_color else None
-        shadow_color = parse_hex(args.shadow_color) if args.shadow_color else None
-        image, title_bbox, center_error = render_title(
+        rendered = render_title_plan(
             image,
-            args.orientation,
-            title,
-            args.title_mode,
-            font_path,
-            colors,
-            outline_color,
-            args.outline_width,
-            shadow_color,
-            shadow_offset,
-            args.shadow_blur,
+            title_plan,
+            registry=FontRegistry(),
+            user_font=args.font,
+            colors=colors,
+            outline_color=parse_hex(args.outline_color) if args.outline_color else None,
+            outline_width=args.outline_width,
+            shadow_color=parse_hex(args.shadow_color) if args.shadow_color else None,
+            shadow_offset=shadow_offset,
+            shadow_blur=args.shadow_blur,
         )
+        image = rendered.image
+        title_bbox = rendered.bbox
+        center_error = rendered.center_error_px
+        font_evidence = rendered.font_evidence
 
     output.parent.mkdir(parents=True, exist_ok=True)
     image.convert("RGB").save(output, format="PNG", optimize=True)
@@ -346,6 +222,14 @@ def main() -> int:
         if verified.size != target or verified.format != "PNG":
             raise ValueError("输出文件写入后尺寸或格式验证失败")
 
+    public_font_evidence = [
+        {
+            **item,
+            "path": display_font_path(Path(str(item["path"])), str(item["source"]), project_root),
+        }
+        for item in font_evidence
+    ]
+    font_path = public_font_evidence[0]["path"] if public_font_evidence else None
     payload = {
         "schema_version": "1.0",
         "status": "passed",
@@ -368,10 +252,14 @@ def main() -> int:
         "crop": {"left": left, "top": top, "right": right, "bottom": bottom},
         "title": {
             "value": title,
-            "font_path": display_path(font_path, project_root) if font_path else None,
+            "font_path": font_path,
             "bbox": title_bbox,
             "center_error_px": center_error,
             "portrait_up_shift_px": PORTRAIT_UP_SHIFT_PX if args.orientation == "portrait" else 0,
+            "layout_family": title_plan["layout_family"] if title_plan else None,
+            "layout_plan_path": display_path(title_plan_path, project_root) if title_plan_path else None,
+            "layout_plan_sha256": title_plan_sha256,
+            "font_evidence": public_font_evidence,
         },
         "checks": {
             "ratio": True,
@@ -388,6 +276,7 @@ def main() -> int:
         },
         "created_at": utc_now(),
     }
+    validate_document(payload, "finalization_report.schema.json")
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(output)

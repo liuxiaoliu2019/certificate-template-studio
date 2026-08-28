@@ -48,7 +48,7 @@
     "title": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["value", "font_path", "bbox", "center_error_px", "portrait_up_shift_px"],
+      "required": ["value", "font_path", "bbox", "center_error_px", "portrait_up_shift_px", "layout_family", "layout_plan_path", "layout_plan_sha256", "font_evidence"],
       "properties": {
         "value": { "type": "string", "minLength": 1 },
         "font_path": { "type": ["string", "null"] },
@@ -59,7 +59,29 @@
           "items": { "type": "integer" }
         },
         "center_error_px": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
-        "portrait_up_shift_px": { "type": "integer", "enum": [0, 110] }
+        "portrait_up_shift_px": { "type": "integer", "enum": [0, 110] },
+        "layout_family": {
+          "type": ["string", "null"],
+          "enum": ["formal_two_tier", "modern_two_tier", "ceremonial_arc", "double_ribbon", "playful_children", "illustrated_integrated", null]
+        },
+        "layout_plan_path": { "type": ["string", "null"] },
+        "layout_plan_sha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "font_evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role", "path", "source", "font_id", "family", "sha256"],
+            "properties": {
+              "role": { "enum": ["formal_serif", "modern_sans", "ceremonial_display", "children_round"] },
+              "path": { "type": "string", "minLength": 1 },
+              "source": { "enum": ["user", "bundled"] },
+              "font_id": { "type": ["string", "null"] },
+              "family": { "type": "string", "minLength": 1 },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            }
+          }
+        }
       }
     },
     "checks": {
