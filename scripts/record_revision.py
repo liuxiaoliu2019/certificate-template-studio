@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 
 from _common import load_json, project_file, relative_posix, save_json, sha256_file, utc_now
+from revision_engine import invalidate_for_revision, verify_rollback_target
+from workflow_engine import transition
 
 
 STYLE_FAMILIES = [
@@ -39,13 +41,7 @@ def parse_args() -> argparse.Namespace:
 
 def invalidate_if_needed(manifest: dict) -> None:
     if manifest["landscape"]["status"] == "approved":
-        manifest["master"]["landscape"] = None
-        manifest["master"]["portrait"] = None
-        manifest["portrait"]["status"] = "stale"
-        if "style_engine" in manifest:
-            manifest["style_engine"]["approved_profile"] = None
-            manifest["style_engine"]["status"] = "stale"
-            manifest["style_engine"]["style_lock"] = "family_locked"
+        invalidate_for_revision(manifest, "landscape")
 
 
 def read_profile(project: Path, relative: str | None) -> tuple[str | None, dict | None]:
@@ -136,7 +132,7 @@ def main() -> int:
         )
         if target is None or not target.get("artifact"):
             raise ValueError(f"找不到可回退的 {args.orientation} revision：{args.rollback}")
-        project_file(project, target["artifact"])
+        verify_rollback_target(project, target)
         entry = {
             "revision_id": revision_id,
             "orientation": args.orientation,
@@ -163,12 +159,13 @@ def main() -> int:
 
     log["entries"].append(entry)
     if args.orientation == "landscape":
-        invalidate_if_needed(manifest)
+        invalidate_for_revision(manifest, "landscape")
         manifest["landscape"]["status"] = "revising"
-        manifest["workflow"]["stage"] = "revising_landscape"
+        transition(manifest, "revising_landscape", project=project)
     else:
-        manifest["portrait"]["status"] = "awaiting_approval"
-        manifest["workflow"]["stage"] = "awaiting_portrait_approval"
+        invalidate_for_revision(manifest, "portrait")
+        manifest["portrait"]["status"] = "revising"
+        transition(manifest, "revising_portrait", project=project)
     manifest["updated_at"] = now
 
     save_json(log_path, log)

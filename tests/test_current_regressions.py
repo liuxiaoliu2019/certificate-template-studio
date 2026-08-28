@@ -61,7 +61,6 @@ def test_landscape_generation_cannot_skip_analysis_and_title(tmp_path: Path) -> 
     assert result.returncode != 0
 
 
-@pytest.mark.xfail(strict=True, reason="CTS-105: revision leaves stale finalization report")
 def test_landscape_revision_clears_stale_report() -> None:
     manifest = {
         "landscape": {
@@ -79,7 +78,6 @@ def test_landscape_revision_clears_stale_report() -> None:
     assert manifest["portrait"]["finalization_report"] is None
 
 
-@pytest.mark.xfail(strict=True, reason="CTS-106: rollback does not check file existence or hash")
 def test_rollback_rejects_missing_revision_artifact(tmp_path: Path) -> None:
     project = init_textbook(tmp_path)
     log_path = project / "revisions/revision_log.json"

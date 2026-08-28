@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 
 from _common import load_json, project_file, relative_posix, save_json, sha256_file, utc_now
+from revision_engine import invalidate_for_revision, verify_rollback_target
+from workflow_engine import transition
 
 
 def parse_args() -> argparse.Namespace:
@@ -91,7 +93,7 @@ def main() -> int:
         )
         if target is None or not target.get("artifact"):
             raise ValueError(f"找不到可回退的 {args.orientation} revision：{args.rollback}")
-        project_file(project, target["artifact"])
+        verify_rollback_target(project, target)
         entry = {
             "revision_id": revision_id,
             "orientation": args.orientation,
@@ -115,12 +117,13 @@ def main() -> int:
         manifest[args.orientation]["selected_file"] = target["artifact"]
 
     log["entries"].append(entry)
-    manifest[args.orientation]["status"] = "awaiting_approval"
-    manifest["master"][args.orientation] = None
-    if args.orientation == source_orientation:
-        manifest[opposite]["status"] = "stale" if manifest[opposite]["selected_file"] else "blocked"
-        manifest["master"][opposite] = None
-    manifest["workflow"]["stage"] = "revising"
+    invalidate_for_revision(manifest, args.orientation, mode="template_bidirectional")
+    manifest[args.orientation]["status"] = "revising"
+    transition(
+        manifest,
+        "revising_source" if args.orientation == source_orientation else "revising_opposite",
+        project=project,
+    )
     manifest["updated_at"] = now
     save_json(log_path, log)
     save_json(manifest_path, manifest)
