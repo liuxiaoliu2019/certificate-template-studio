@@ -72,3 +72,6 @@ not_started -> exploring -> candidate_selected -> revising
 普通字段可用 `update_manifest.py --set` 更新，但脚本禁止用 `--set` 直接写 approval/status 锁字段。批准必须调用 `--approve-landscape` 或 `--approve-portrait` 并保存用户原话。
 
 回退使用 `record_revision.py --rollback <revision_id>`，不删除任何文件。
+# 旧项目迁移
+
+教材 manifest 1.0–1.4 与模板 manifest 1.0–1.2 必须先运行 `scripts/migrate_project.py`。迁移器先校验目标数据，再在 `migrations/backups/` 保存原 manifest；缺新版收尾报告的旧 Master 标记 `legacy_unverified`，重新验证前不得用作新版批准证据。重复迁移保持幂等。

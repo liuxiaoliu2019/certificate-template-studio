@@ -161,6 +161,7 @@
         "selected_file": { "type": ["string", "null"] },
         "active_revision_id": { "type": ["string", "null"], "pattern": "^r[0-9]{3,}$" },
         "finalization_report": { "type": ["string", "null"] }
+        ,"legacy_verification": { "enum": ["legacy_unverified", "verified"] }
       }
     },
     "outputContract": {

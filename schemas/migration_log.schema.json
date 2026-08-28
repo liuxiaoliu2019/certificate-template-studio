@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/certificate-template-studio/migration_log.schema.json",
+  "title": "Certificate project migration log",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "mode", "source_version", "target_version", "manifest", "backup", "before_sha256", "after_sha256", "migrated_at"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "status": {"const": "migrated"},
+    "mode": {"enum": ["textbook_cover", "template_bidirectional"]},
+    "source_version": {"type": "string"},
+    "target_version": {"type": "string"},
+    "manifest": {"type": "string", "minLength": 1},
+    "backup": {"type": "string", "minLength": 1},
+    "before_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "after_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "migrated_at": {"type": "string", "format": "date-time"}
+  }
+}
