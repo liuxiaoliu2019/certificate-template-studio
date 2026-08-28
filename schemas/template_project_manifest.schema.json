@@ -95,7 +95,14 @@
           "orientation": { "$ref": "#/$defs/orientation" },
           "artifact": { "type": "string", "minLength": 1 },
           "user_confirmation": { "type": "string", "minLength": 1 },
+          "approval_intent": { "const": "explicit_positive" },
+          "title": { "type": "string", "minLength": 1 },
+          "artifact_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
           "finalization_report": { "type": "string", "minLength": 1 },
+          "finalization_report_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "style_profile": { "type": ["string", "null"] },
+          "title_layout_plan": { "type": ["string", "null"] },
+          "historical": { "type": "boolean" },
           "approved_at": { "type": "string", "format": "date-time" }
         }
       }

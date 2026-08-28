@@ -17,12 +17,10 @@ def test_whitespace_only_title_is_rejected(tmp_path: Path) -> None:
     assert result.returncode != 0
 
 
-@pytest.mark.xfail(strict=True, reason="CTS-102: negated approval contains the keyword")
 def test_negated_approval_is_rejected() -> None:
     assert approval_words_valid("landscape", "不要确认横版定稿") is False
 
 
-@pytest.mark.xfail(strict=True, reason="CTS-103: report title is not bound to manifest title")
 def test_report_title_must_match_manifest(tmp_path: Path) -> None:
     project = init_textbook(tmp_path)
     manifest_path = project / "configs/project_manifest.json"

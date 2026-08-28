@@ -5,13 +5,15 @@ import argparse
 import sys
 from pathlib import Path
 
-from _common import load_json, project_file, save_json, sha256_file, utc_now
+from _common import load_json, project_file, save_json, utc_now
+from approval_engine import (
+    approval_event,
+    approval_words_valid as strict_approval_words_valid,
+    checked_artifact as strict_checked_artifact,
+    validate_finalization_report,
+)
+from project_io import resolve_project_path
 from workflow_engine import transition
-
-try:
-    from PIL import Image
-except ImportError as exc:  # pragma: no cover - depends on local runtime
-    raise SystemExit("缺少 Pillow。请先安装 Pillow。") from exc
 
 
 SAFE_STAGES = [
@@ -42,48 +44,19 @@ def parse_args() -> argparse.Namespace:
 
 
 def checked_artifact(project: Path, relative: str | None) -> str:
-    if not relative:
-        raise ValueError("选择或批准方向时必须提供 --artifact")
-    path = project_file(project, relative)
-    if not path.is_file():
-        raise FileNotFoundError(f"项目内找不到成品：{relative}")
-    return path.relative_to(project.resolve()).as_posix()
+    return strict_checked_artifact(project, relative)
 
 
 def approval_words_valid(orientation: str, words: str | None) -> bool:
-    if not words or not words.strip():
-        return False
-    keyword = "横版定稿" if orientation == "landscape" else "竖版定稿"
-    return keyword in words
+    return strict_approval_words_valid(orientation, words)
 
 
 def checked_finalization_report(project: Path, relative: str | None, artifact: str, orientation: str) -> str:
-    if not relative:
-        raise ValueError("新版项目批准 Master 时必须提供 --finalization-report")
-    report_path = project_file(project, relative)
-    if not report_path.is_file():
-        raise FileNotFoundError(f"项目内找不到收尾报告：{relative}")
-    report = load_json(report_path)
-    if report.get("status") != "passed" or report.get("orientation") != orientation:
-        raise ValueError("收尾报告未通过或方向不匹配")
-    expected = {"landscape": (2172, 1536), "portrait": (1536, 2172)}[orientation]
-    output = report.get("output", {})
-    if (output.get("width_px"), output.get("height_px")) != expected or output.get("format") != "PNG":
-        raise ValueError("收尾报告的输出尺寸或格式不合格")
-    artifact_path = project_file(project, artifact)
-    reported_path = Path(str(output.get("path", "")))
-    if reported_path.is_absolute():
-        matches = reported_path.resolve() == artifact_path.resolve()
-    else:
-        matches = project_file(project, reported_path.as_posix()).resolve() == artifact_path.resolve()
-    if not matches:
-        raise ValueError("收尾报告引用的成品与待批准成品不一致")
-    with Image.open(artifact_path) as image:
-        if image.size != expected or image.format != "PNG":
-            raise ValueError("待批准成品的实际尺寸或格式不合格")
-    if output.get("sha256") != sha256_file(artifact_path):
-        raise ValueError("待批准成品与收尾报告哈希不一致")
-    return report_path.relative_to(project.resolve()).as_posix()
+    manifest = load_json(project / "configs/template_project_manifest.json")
+    report_path, _ = validate_finalization_report(
+        project, relative, artifact, orientation, manifest
+    )
+    return report_path
 
 
 def main() -> int:
@@ -123,7 +96,9 @@ def main() -> int:
         artifact = checked_artifact(project, args.artifact)
         report_path = None
         if manifest.get("schema_version") in {"1.2", "1.3"} or args.finalization_report:
-            report_path = checked_finalization_report(project, args.finalization_report, artifact, orientation)
+            report_path, _ = validate_finalization_report(
+                project, args.finalization_report, artifact, orientation, manifest
+            )
         manifest[orientation]["selected_file"] = artifact
         if "finalization_report" in manifest[orientation]:
             manifest[orientation]["finalization_report"] = report_path
@@ -147,8 +122,8 @@ def main() -> int:
         artifact = checked_artifact(project, args.artifact)
         report_path = None
         if manifest.get("schema_version") in {"1.2", "1.3"} or args.finalization_report:
-            report_path = checked_finalization_report(
-                project, args.finalization_report, artifact, orientation
+            report_path, _ = validate_finalization_report(
+                project, args.finalization_report, artifact, orientation, manifest
             )
         now = utc_now()
         manifest[orientation]["selected_file"] = artifact
@@ -161,14 +136,16 @@ def main() -> int:
         if not dna.is_file():
             raise FileNotFoundError("缺少 Template DNA，不能批准")
         manifest["master"]["template_dna"] = manifest["template_dna_path"]
-        approval = {
-                "orientation": orientation,
-                "artifact": artifact,
-                "user_confirmation": args.user_confirmation.strip(),
-                "approved_at": now,
-            }
-        if report_path:
-            approval["finalization_report"] = report_path
+        approval = approval_event(
+            orientation=orientation,
+            artifact=artifact,
+            artifact_path=resolve_project_path(project, artifact, must_exist=True),
+            report_path=report_path,
+            report_file=resolve_project_path(project, report_path, must_exist=True),
+            title=manifest["current_title"],
+            user_confirmation=args.user_confirmation or "",
+            approved_at=now,
+        )
         manifest["approvals"].append(approval)
         if orientation == source:
             if manifest[opposite]["status"] == "approved":
