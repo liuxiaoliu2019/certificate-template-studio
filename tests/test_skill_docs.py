@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_skill_version_and_required_invariants() -> None:
     text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-    assert 'version: "1.7.0"' in text
+    assert 'version: "1.7.1"' in text
     for invariant in ("2172×1536", "1536×2172", "x=50%", "唯一可读文字", "确认横版定稿"):
         assert invariant in text
 
@@ -28,3 +28,10 @@ def test_title_container_and_retry_rules_do_not_conflict() -> None:
     assert "禁止横幅、丝带" not in content
     assert "连续自动修正最多两次" not in content
     assert "每个方向最多自动修正一次" in content
+
+
+def test_template_title_lock_is_a_hard_invariant() -> None:
+    text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    workflow = (ROOT / "references" / "template-bidirectional-workflow.md").read_text(encoding="utf-8")
+    assert "Template DNA.title_system" in text
+    assert "默认金色渐变" in workflow

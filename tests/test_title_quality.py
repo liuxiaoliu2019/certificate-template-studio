@@ -105,3 +105,17 @@ def test_repair_order_is_stable(tmp_path, issue: str, step: str) -> None:
         "landscape", artifact, plan, _scores(82), issues=[issue]
     )
     assert report["repair"]["step"] == step
+
+
+def test_template_title_failure_routes_to_structure_lock_repair(tmp_path) -> None:
+    artifact, plan = _files(tmp_path)
+    report = build_quality_report(
+        "landscape",
+        artifact,
+        plan,
+        _scores(),
+        hard_failures=["template_geometry_lost", "unwanted_gradient"],
+        issues=["template_geometry_lost", "unwanted_gradient"],
+    )
+    assert report["qualified"] is False
+    assert request_repair(report) == "template_title_lock"

@@ -21,7 +21,7 @@
       "additionalProperties": false,
       "required": ["type", "title_only"],
       "properties": {
-        "type": { "enum": ["none", "arc", "single_ribbon", "double_ribbon", "illustrated_base"] },
+        "type": { "enum": ["none", "arc", "single_ribbon", "double_ribbon", "illustrated_base", "source_native"] },
         "title_only": { "const": true }
       }
     },
@@ -39,7 +39,10 @@
           "size_ratio": { "type": "number", "minimum": 0.4, "maximum": 1 },
           "tracking_em": { "type": "number", "minimum": -0.05, "maximum": 0.35 },
           "baseline_offset_em": { "type": "number", "minimum": -0.3, "maximum": 0.3 },
-          "path": { "enum": ["straight", "arc_up", "ribbon"] }
+          "path": { "enum": ["straight", "arc_up", "ribbon"] },
+          "arc_degrees": { "type": "number", "minimum": 0, "maximum": 40 },
+          "fill_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+          "outline_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
         }
       }
     },
@@ -52,6 +55,43 @@
         "secondary": { "enum": ["formal_serif", "modern_sans", "ceremonial_display", "children_round"] }
       }
     },
+    "visual_treatment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fill_style", "outline_width_px", "shadow_enabled"],
+      "properties": {
+        "fill_style": { "enum": ["flat_solid", "deterministic_effect", "ai_integrated"] },
+        "outline_width_px": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "shadow_enabled": { "type": "boolean" },
+        "outline_color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+      }
+    },
+    "template_title_lock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geometry", "container", "fill_style", "source_title_region", "forbid_generic_container", "forbid_unrequested_gradient"],
+      "properties": {
+        "geometry": { "enum": ["straight", "arc_up", "single_ribbon_arc", "double_ribbon_arc", "illustrated"] },
+        "container": { "enum": ["none", "source_native", "single_ribbon", "double_ribbon", "illustrated_base"] },
+        "fill_style": { "enum": ["flat_solid", "deterministic_effect", "ai_integrated"] },
+        "source_title_region": { "$ref": "#/$defs/region" },
+        "forbid_generic_container": { "type": "boolean" },
+        "forbid_unrequested_gradient": { "type": "boolean" }
+      }
+    },
     "created_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    }
   }
 }

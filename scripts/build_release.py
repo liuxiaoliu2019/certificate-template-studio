@@ -12,7 +12,7 @@ from pathlib import Path
 from font_registry import FontRegistry
 
 
-EXCLUDED_PARTS = {".git", "__pycache__", "build", "dist"}
+EXCLUDED_PARTS = {".git", "__pycache__", "build", "dist", ".pytest-temp", ".pytest_cache"}
 EXCLUDED_SUFFIXES = {".pyc", ".zip"}
 ARCHIVE_TIMESTAMP = (2026, 1, 1, 0, 0, 0)
 

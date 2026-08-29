@@ -111,6 +111,53 @@
         "prohibited": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
       }
     },
+    "title_system": {
+      "description": "源模板标题的非文字结构锁。不得保存、转录或推断源标题文字。",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geometry", "container", "line_structure", "font_roles", "visual_treatment", "placement"],
+      "properties": {
+        "geometry": { "enum": ["straight", "arc_up", "single_ribbon_arc", "double_ribbon_arc", "illustrated"] },
+        "container": { "enum": ["none", "source_native", "single_ribbon", "double_ribbon", "illustrated_base"] },
+        "line_structure": { "enum": ["single", "primary_secondary"] },
+        "font_roles": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primary", "secondary"],
+          "properties": {
+            "primary": { "enum": ["formal_serif", "modern_sans", "ceremonial_display", "children_round"] },
+            "secondary": { "enum": ["formal_serif", "modern_sans", "ceremonial_display", "children_round"] }
+          }
+        },
+        "visual_treatment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["render_mode", "fill_style", "outline_style", "outline_width_px", "shadow_enabled"],
+          "properties": {
+            "render_mode": { "enum": ["vector_flat", "vector_effect", "ai_integrated"] },
+            "fill_style": { "enum": ["flat_solid", "deterministic_effect", "ai_integrated"] },
+            "outline_style": { "enum": ["none", "solid"] },
+            "outline_width_px": { "type": "integer", "minimum": 0, "maximum": 16 },
+            "shadow_enabled": { "type": "boolean" },
+            "primary_fill_color": { "$ref": "#/$defs/color" },
+            "secondary_fill_color": { "$ref": "#/$defs/color" },
+            "outline_color": { "$ref": "#/$defs/color" }
+          }
+        },
+        "placement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["center_x_percent", "width_percent", "source_title_region"],
+          "properties": {
+            "center_x_percent": { "const": 50 },
+            "width_percent": { "type": "number", "minimum": 52, "maximum": 72 },
+            "source_title_region": { "$ref": "#/$defs/region" },
+            "primary_arc_degrees": { "type": "number", "minimum": 0, "maximum": 40 },
+            "secondary_arc_degrees": { "type": "number", "minimum": 0, "maximum": 40 }
+          }
+        }
+      }
+    },
     "requires_character_identity": { "type": "boolean" },
     "notes": { "type": "array", "items": { "type": "string" } }
   },
@@ -126,6 +173,7 @@
         "aspect_ratio": { "type": "number", "exclusiveMinimum": 0 }
       }
     },
+    "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
     "region": {
       "type": "object",
       "additionalProperties": false,

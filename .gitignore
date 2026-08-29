@@ -12,3 +12,5 @@ build/
 work/
 outputs/
 *.egg-info/
+.pytest-temp/
+.pytest_cache/

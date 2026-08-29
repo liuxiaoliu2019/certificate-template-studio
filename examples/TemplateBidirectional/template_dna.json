@@ -118,6 +118,28 @@
       "复制或保留任何源文字"
     ]
   },
+  "title_system": {
+    "geometry": "straight",
+    "container": "none",
+    "line_structure": "primary_secondary",
+    "font_roles": {
+      "primary": "formal_serif",
+      "secondary": "formal_serif"
+    },
+    "visual_treatment": {
+      "render_mode": "vector_flat",
+      "fill_style": "flat_solid",
+      "outline_style": "none",
+      "outline_width_px": 0,
+      "shadow_enabled": false,
+      "primary_fill_color": "#4D4D4D"
+    },
+    "placement": {
+      "center_x_percent": 50,
+      "width_percent": 62,
+      "source_title_region": { "x": 0.30, "y": 0.15, "width": 0.40, "height": 0.17 }
+    }
+  },
   "requires_character_identity": false,
   "notes": [
     "示例不包含源模板及成品图片。"

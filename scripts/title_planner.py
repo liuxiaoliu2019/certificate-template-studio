@@ -6,7 +6,7 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
-from _common import save_json, utc_now
+from _common import load_json, save_json, utc_now
 from schema_runtime import validate_document
 
 
@@ -105,6 +105,34 @@ def _layout_defaults(layout: str) -> tuple[str, str, str, str]:
     return mapping[layout]
 
 
+def _load_template_dna(template_dna: dict[str, Any] | Path | None) -> dict[str, Any] | None:
+    if template_dna is None:
+        return None
+    if isinstance(template_dna, Path):
+        loaded = load_json(template_dna.expanduser().resolve())
+    elif isinstance(template_dna, dict):
+        loaded = template_dna
+    else:
+        raise TypeError("template_dna 必须是 JSON 对象、Path 或 None")
+    validate_document(loaded, "template_dna.schema.json")
+    return loaded
+
+
+def _template_title_settings(template_dna: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Return the non-text title structure lock carried by a template, if present."""
+    if template_dna is None:
+        return None
+    if not template_dna.get("title_system"):
+        raise ValueError(
+            "Template DNA 缺少 title_system；请先重新分析源模板标题区域，"
+            "不得回退为默认直排或默认金色标题"
+        )
+    system = template_dna["title_system"]
+    # A source-native container is intentionally recreated by the image step.  The
+    # deterministic renderer must only add letters, never a generic replacement ribbon.
+    return system
+
+
 def build_plan(
     title: str,
     orientation: str,
@@ -112,15 +140,35 @@ def build_plan(
     style_family: str | None = None,
     layout_family: str | None = None,
     render_mode: str = "vector_effect",
+    template_dna: dict[str, Any] | Path | None = None,
 ) -> dict[str, Any]:
     if orientation not in {"landscape", "portrait"}:
         raise ValueError("orientation 必须是 landscape 或 portrait")
     if render_mode not in RENDER_MODES:
         raise ValueError(f"未知标题渲染模式：{render_mode}")
     normalized = normalize_title(title)
+    source_dna = _load_template_dna(template_dna)
+    title_system = _template_title_settings(source_dna)
     layout = choose_layout(normalized, style_family, layout_family)
+    if title_system:
+        geometry = title_system["geometry"]
+        layout = {
+            "double_ribbon_arc": "double_ribbon",
+            "single_ribbon_arc": "double_ribbon",
+            "arc_up": "ceremonial_arc",
+            "illustrated": "illustrated_integrated",
+            "straight": "formal_two_tier",
+        }[geometry]
+        # Source-native title treatments are authority in bidirectional-template mode.
+        # This prevents a generic default gold effect from replacing a flat cartoon title.
+        render_mode = title_system["visual_treatment"]["render_mode"]
     lines = semantic_lines(normalized)
     container, primary_font, secondary_font, primary_path = _layout_defaults(layout)
+
+    if title_system:
+        container = title_system["container"]
+        primary_font = title_system["font_roles"]["primary"]
+        secondary_font = title_system["font_roles"]["secondary"]
 
     line_records = []
     for index, text in enumerate(lines):
@@ -128,18 +176,33 @@ def build_plan(
         size_ratio = 0.52 if secondary else 1.0
         tracking = 0.16 if secondary else (0.05 if layout != "playful_children" else 0.02)
         path = "ribbon" if layout == "double_ribbon" else (primary_path if index == 0 else "straight")
-        line_records.append(
-            {
-                "text": text,
-                "role": "secondary" if secondary else "primary",
-                "size_ratio": size_ratio,
-                "tracking_em": tracking,
-                "baseline_offset_em": 0,
-                "path": path,
-            }
-        )
+        record: dict[str, Any] = {
+            "text": text,
+            "role": "secondary" if secondary else "primary",
+            "size_ratio": size_ratio,
+            "tracking_em": tracking,
+            "baseline_offset_em": 0,
+            "path": path,
+        }
+        if title_system:
+            geometry = title_system["geometry"]
+            if geometry in {"arc_up", "single_ribbon_arc", "double_ribbon_arc"}:
+                record["path"] = "arc_up"
+                record["arc_degrees"] = title_system["placement"].get(
+                    "secondary_arc_degrees" if secondary else "primary_arc_degrees",
+                    10 if secondary else 20,
+                )
+            treatment = title_system["visual_treatment"]
+            fill = treatment.get("secondary_fill_color" if secondary else "primary_fill_color")
+            if fill:
+                record["fill_color"] = fill
+            if treatment.get("outline_color"):
+                record["outline_color"] = treatment["outline_color"]
+        line_records.append(record)
 
     width = 62 if orientation == "landscape" else 66
+    if title_system:
+        width = title_system["placement"]["width_percent"]
     plan = {
         "schema_version": "1.0",
         "title": title.strip(),
@@ -156,6 +219,22 @@ def build_plan(
         "font_roles": {"primary": primary_font, "secondary": secondary_font},
         "created_at": utc_now(),
     }
+    if title_system:
+        treatment = title_system["visual_treatment"]
+        plan["visual_treatment"] = {
+            "fill_style": treatment["fill_style"],
+            "outline_width_px": treatment["outline_width_px"],
+            "shadow_enabled": treatment["shadow_enabled"],
+            **({"outline_color": treatment["outline_color"]} if treatment.get("outline_color") else {}),
+        }
+        plan["template_title_lock"] = {
+            "geometry": title_system["geometry"],
+            "container": title_system["container"],
+            "fill_style": treatment["fill_style"],
+            "source_title_region": title_system["placement"]["source_title_region"],
+            "forbid_generic_container": title_system["container"] == "source_native",
+            "forbid_unrequested_gradient": treatment["fill_style"] == "flat_solid",
+        }
     validate_document(plan, "title_layout_plan.schema.json")
     return plan
 
@@ -167,6 +246,7 @@ def main() -> int:
     parser.add_argument("--style-family")
     parser.add_argument("--layout-family", choices=LAYOUT_FAMILIES)
     parser.add_argument("--render-mode", choices=RENDER_MODES, default="vector_effect")
+    parser.add_argument("--template-dna", type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     plan = build_plan(
@@ -175,6 +255,7 @@ def main() -> int:
         style_family=args.style_family,
         layout_family=args.layout_family,
         render_mode=args.render_mode,
+        template_dna=args.template_dna,
     )
     save_json(args.output.expanduser().resolve(), plan)
     print(args.output.expanduser().resolve())
