@@ -36,7 +36,8 @@
       "items": {
         "enum": [
           "spelling_error", "missing_glyph", "wrong_semantic_break", "center_offset",
-          "low_contrast", "container_collision", "flat_noise", "extra_text"
+          "low_contrast", "container_collision", "flat_noise", "extra_text",
+          "template_geometry_lost", "template_material_mismatch", "unwanted_gradient"
         ]
       }
     },
@@ -47,7 +48,8 @@
         "enum": [
           "tracking_or_spacing", "weak_hierarchy", "font_mismatch", "missing_glyph",
           "wrong_semantic_break", "layout_overload", "low_contrast", "container_collision",
-          "flat_noise", "spelling_error", "extra_text", "center_offset"
+          "flat_noise", "spelling_error", "extra_text", "center_offset",
+          "template_geometry_lost", "template_material_mismatch", "unwanted_gradient"
         ]
       }
     },
@@ -65,7 +67,7 @@
           "type": ["string", "null"],
           "enum": [
             "tracking_line_spacing", "size_ratio", "compatible_font",
-            "semantic_two_line", "layout_downgrade", null
+            "semantic_two_line", "template_title_lock", "layout_downgrade", null
           ]
         }
       }

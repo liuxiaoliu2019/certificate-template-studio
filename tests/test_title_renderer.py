@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+from pathlib import Path
 
 import pytest
 from PIL import Image
@@ -63,3 +65,31 @@ def test_double_ribbon_contains_only_planned_title_lines() -> None:
     plan = build_plan("CERTIFICATE OF COMPLETION", "landscape", layout_family="double_ribbon")
     assert [line["text"] for line in plan["lines"]] == ["CERTIFICATE", "OF COMPLETION"]
     assert plan["container"]["title_only"] is True
+
+
+def test_template_arc_title_keeps_solid_source_colors_and_outline() -> None:
+    root = Path(__file__).resolve().parents[1]
+    dna = json.loads((root / "examples" / "TemplateBidirectional" / "template_dna.json").read_text(encoding="utf-8"))
+    dna["title_system"] = {
+        "geometry": "double_ribbon_arc",
+        "container": "source_native",
+        "line_structure": "primary_secondary",
+        "font_roles": {"primary": "children_round", "secondary": "children_round"},
+        "visual_treatment": {
+            "render_mode": "vector_flat", "fill_style": "flat_solid", "outline_style": "solid",
+            "outline_width_px": 5, "shadow_enabled": False,
+            "primary_fill_color": "#5A2A1D", "secondary_fill_color": "#C9576B", "outline_color": "#FFF7E7",
+        },
+        "placement": {
+            "center_x_percent": 50, "width_percent": 64,
+            "source_title_region": {"x": 0.24, "y": 0.08, "width": 0.52, "height": 0.20},
+            "primary_arc_degrees": 24, "secondary_arc_degrees": 10,
+        },
+    }
+    plan = build_plan("CERTIFICATE OF COMPLETION", "landscape", template_dna=dna)
+    result = render_title_plan(Image.new("RGBA", (2172, 1536), "white"), plan)
+    pixels = set(result.image.getdata())
+    assert (90, 42, 29, 255) in pixels
+    assert (201, 87, 107, 255) in pixels
+    assert (255, 247, 231, 255) in pixels
+    assert result.center_error_px <= 1

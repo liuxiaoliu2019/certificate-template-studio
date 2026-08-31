@@ -2,7 +2,7 @@
 name: certificate-template-studio
 description: 从教材封面创建带角色身份锁的横竖证书 Master，或把现成横版/竖版证书模板高保真双向重构；支持质量托管、标题设计、审批、回退和多标题复用。
 metadata:
-  version: "1.7.0"
+  version: "1.7.1"
 ---
 
 # Certificate Template Studio
@@ -48,7 +48,7 @@ initialized → analyzing_source → awaiting_title → planning_landscape
 
 ## 模式 2｜现成模板双向转换
 
-读取 [template-bidirectional-workflow.md](references/template-bidirectional-workflow.md)，用 `scripts/init_template_project.py` 初始化。源模板决定边框、纹样、配色、线宽、材质和证书秩序；删除全部源文字，先重制并批准源方向，再按目标控制图重构另一方向。禁止旋转、拉伸、机械裁切、直接扩边或复制纵横布局。
+读取 [template-bidirectional-workflow.md](references/template-bidirectional-workflow.md)，用 `scripts/init_template_project.py` 初始化。源模板决定边框、纹样、配色、线宽、材质、证书秩序和非文字标题结构；删除全部源文字，先重制并批准源方向，再按目标控制图重构另一方向。弧形/飘带标题的曲线、原生承载物、字体气质和扁平/效果材质必须由 `Template DNA.title_system` 锁定，不能被默认直排或金色渐变覆盖。程序标题调用 `title_planner.py --template-dna` 与 `finalize_certificate.py --template-dna`。禁止旋转、拉伸、机械裁切、直接扩边或复制纵横布局。
 
 ```text
 initialized → analyzing_source → awaiting_title → regenerating_source
@@ -65,6 +65,7 @@ initialized → analyzing_source → awaiting_title → regenerating_source
 - 标题家族：正式双层、现代双层、典礼弧形、双层飘带、儿童逐字配色、插画融合底座。
 - 丝带或底座只可服务唯一主标题；禁止姓名卡、正文卡、日期徽章、签名横幅等额外文字容器。
 - `vector_flat` 保持纯色无噪点；`vector_effect` 使用确定性渐变、描边和阴影；`ai_integrated` 必须经过视觉文字验收。
+- 模板模式的平面标题必须保留源模板规定的纯色和可选纯色描边；未被 `title_system` 明确允许时，渐变、金属高光和阴影均为硬失败。
 - 正式横版为 `2172×1536` PNG，竖版为 `1536×2172` PNG。必须运行 `scripts/finalize_certificate.py` 并保存通过的收尾报告。
 
 ## 质量托管与停止条件

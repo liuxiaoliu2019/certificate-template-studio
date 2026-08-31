@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here.
 
+## [1.7.1] - 2026-08-29
+
+### Fixed
+
+- Template bidirectional conversion now locks title geometry, source-native title carriers, font character, and material treatment in Template DNA.
+- Curved and ribbon titles no longer silently fall back to straight generic text; flat source titles no longer inherit a default gold gradient, highlight, or shadow.
+- Deterministic flat titles can retain an intentional solid outline and use separate solid colors for primary and secondary title tiers.
+
+### Added
+
+- Template-title quality failures and a targeted one-pass repair route for lost geometry, material mismatch, and unwanted gradients.
+
 ## [1.7.0] - 2026-08-28
 
 ### Added

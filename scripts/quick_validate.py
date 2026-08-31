@@ -213,6 +213,18 @@ def validate_template_example(root: Path) -> None:
             raise ValueError("模板文字区域必须全部标记为 remove")
         if any(key in region for key in ("content", "text", "transcript", "original_text")):
             raise ValueError("模板 DNA 不得保存或转录源文字")
+    title_system = dna.get("title_system")
+    if not isinstance(title_system, dict):
+        raise ValueError("Template DNA 缺少标题结构锁")
+    if title_system.get("placement", {}).get("center_x_percent") != 50:
+        raise ValueError("模板标题结构锁必须固定 x=50%")
+    treatment = title_system.get("visual_treatment", {})
+    if treatment.get("fill_style") == "flat_solid":
+        if treatment.get("render_mode") != "vector_flat" or treatment.get("shadow_enabled") is not False:
+            raise ValueError("平面模板标题必须使用无阴影 vector_flat")
+    forbidden_source_words = {"text", "content", "transcript", "original_text", "source_words"}
+    if forbidden_source_words & set(title_system):
+        raise ValueError("标题结构锁不得保存或转录源标题文字")
     stage = manifest.get("workflow", {}).get("stage")
     if stage in {"deriving_opposite", "validating_opposite", "awaiting_opposite_approval", "complete"}:
         if manifest[source].get("status") != "approved":
@@ -238,8 +250,8 @@ def main() -> int:
         text = skill_path.read_text(encoding="utf-8")
         if not re.search(r"^name:\s*certificate-template-studio\s*$", text, re.MULTILINE):
             errors.append("SKILL.md name 不正确")
-        if not re.search(r'version:\s*"1\.7\.0"', text):
-            errors.append("SKILL.md 版本不是 1.7.0")
+        if not re.search(r'version:\s*"1\.7\.1"', text):
+            errors.append("SKILL.md 版本不是 1.7.1")
         if text.count(MODE_MENU) != 1:
             errors.append("SKILL.md 缺少固定模式菜单或菜单文案发生变化")
         for invariant in (
@@ -256,7 +268,10 @@ def main() -> int:
             if "://" not in link and not (root / link).is_file():
                 errors.append(f"SKILL.md 引用不存在：{link}")
 
+    ignored_runtime_parts = {".pytest-temp", ".pytest_cache", "__pycache__", "dist", "build"}
     for path in root.rglob("*.json"):
+        if ignored_runtime_parts & set(path.relative_to(root).parts):
+            continue
         try:
             load_json(path)
         except Exception as exc:
@@ -319,7 +334,7 @@ def main() -> int:
             print(f"FAIL: {item}", file=sys.stderr)
         return 1
     recommendation_count = len(list((root / "examples").rglob("style_recommendation.json")))
-    print(f"PASS: certificate-template-studio v1.7.0；固定小程序尺寸；六类标题设计；质量托管；最小上下文；缓存；角色身份锁；模板双向审批锁；7 个风格家族；{recommendation_count} 组推荐测试。")
+    print(f"PASS: certificate-template-studio v1.7.1；固定小程序尺寸；六类标题设计；模板标题结构锁；质量托管；最小上下文；缓存；角色身份锁；模板双向审批锁；7 个风格家族；{recommendation_count} 组推荐测试。")
     return 0
 
 

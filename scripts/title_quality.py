@@ -26,6 +26,9 @@ HARD_FAILURES = {
     "container_collision",
     "flat_noise",
     "extra_text",
+    "template_geometry_lost",
+    "template_material_mismatch",
+    "unwanted_gradient",
 }
 ISSUES = {
     "tracking_or_spacing",
@@ -40,8 +43,12 @@ ISSUES = {
     "spelling_error",
     "extra_text",
     "center_offset",
+    "template_geometry_lost",
+    "template_material_mismatch",
+    "unwanted_gradient",
 }
 REPAIR_PRIORITY = (
+    ({"template_geometry_lost", "template_material_mismatch", "unwanted_gradient"}, "template_title_lock"),
     ({"tracking_or_spacing", "low_contrast", "center_offset"}, "tracking_line_spacing"),
     ({"weak_hierarchy"}, "size_ratio"),
     ({"font_mismatch", "missing_glyph"}, "compatible_font"),

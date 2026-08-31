@@ -22,6 +22,13 @@ class TitleRenderResult:
     font_evidence: list[dict[str, Any]]
 
 
+def _rgba_from_hex(value: str) -> RGBA:
+    text = value.strip().lstrip("#")
+    if len(text) != 6:
+        raise ValueError(f"标题颜色必须是 #RRGGBB：{value}")
+    return tuple(int(text[index : index + 2], 16) for index in range(0, 6, 2)) + (255,)  # type: ignore[return-value]
+
+
 def _load_font(path: Path, size: int, weight: int) -> ImageFont.FreeTypeFont:
     font = ImageFont.truetype(str(path), size=max(8, size))
     try:
@@ -201,6 +208,10 @@ def _draw_container(
     palette: list[RGBA],
 ) -> None:
     draw = ImageDraw.Draw(layer)
+    if container == "source_native":
+        # The source-oriented image prompt recreates this title carrier without
+        # source words. Drawing a generic polygon here would replace its identity.
+        return
     if container in {"double_ribbon", "single_ribbon"}:
         offsets = [-(line_height * 2 // 3), line_height * 2 // 3] if len(widths) > 1 else [0]
         for index, (width, offset) in enumerate(zip(widths, offsets)):
@@ -232,10 +243,16 @@ def _draw_arc_line(
     outline_color: RGBA,
     outline_width: int,
     max_width: int,
+    arc_degrees: float | None = None,
 ) -> None:
     advances = [_advance(font, character) for character in text]
     total = max(1.0, sum(advances))
-    span = min(math.radians(36), total / max(1, max_width) * math.radians(44))
+    span = (
+        math.radians(arc_degrees)
+        if arc_degrees is not None
+        else min(math.radians(36), total / max(1, max_width) * math.radians(44))
+    )
+    span = max(math.radians(1), span)
     radius = max(max_width * 1.2, total / max(span, 0.01))
     progress = 0.0
     for index, (character, advance) in enumerate(zip(text, advances)):
@@ -292,7 +309,7 @@ def render_title_plan(
     user_font: Path | None = None,
     colors: list[RGBA] | None = None,
     outline_color: RGBA | None = None,
-    outline_width: int = 3,
+    outline_width: int | None = None,
     shadow_color: RGBA | None = None,
     shadow_offset: tuple[int, int] = (7, 9),
     shadow_blur: int = 4,
@@ -302,6 +319,18 @@ def render_title_plan(
         raise ValueError("ai_integrated 标题不由确定性标题渲染器绘制")
 
     registry = registry or FontRegistry()
+    treatment = plan.get("visual_treatment", {})
+    fill_style = treatment.get(
+        "fill_style",
+        "flat_solid" if plan["render_mode"] == "vector_flat" else "deterministic_effect",
+    )
+    effective_outline_width = (
+        outline_width
+        if outline_width is not None
+        else int(treatment.get("outline_width_px", 0 if plan["render_mode"] == "vector_flat" else 3))
+    )
+    if effective_outline_width < 0:
+        raise ValueError("标题描边宽度不能为负数")
     width, height = image.size
     center_x = round(width * plan["center_x_percent"] / 100)
     baseline_y = round(height * (0.165 if plan["orientation"] == "landscape" else 0.186))
@@ -328,7 +357,7 @@ def render_title_plan(
             font = _load_font(resolved.path, size, weight)
             tracking = round(size * line["tracking_em"])
             line_width = _tracked_width(line["text"], font, tracking)
-            bbox = font.getbbox(line["text"], stroke_width=outline_width)
+            bbox = font.getbbox(line["text"], stroke_width=effective_outline_width)
             line_height = max(1, bbox[3] - bbox[1])
             fitted.append((font, tracking, line_width, line_height))
             widest = max(widest, line_width)
@@ -348,12 +377,18 @@ def render_title_plan(
         else [(255, 247, 184, 255), (219, 173, 55, 255), (111, 70, 14, 255)]
     )
     palette = colors or default_colors
-    outline = outline_color or ((91, 57, 13, 255) if plan["render_mode"] == "vector_effect" else palette[0])
+    outline = outline_color or (
+        _rgba_from_hex(treatment["outline_color"])
+        if treatment.get("outline_color")
+        else ((91, 57, 13, 255) if plan["render_mode"] == "vector_effect" else palette[0])
+    )
     shadow_fill = shadow_color or (39, 27, 10, 110)
-    if plan["render_mode"] == "vector_flat":
+    if plan["render_mode"] == "vector_flat" or fill_style == "flat_solid":
         palette = [palette[0]]
-        outline = palette[0]
-        outline_width = 0
+        shadow_fill = (0, 0, 0, 0)
+        shadow_offset = (0, 0)
+        shadow_blur = 0
+    elif treatment.get("shadow_enabled") is False:
         shadow_fill = (0, 0, 0, 0)
         shadow_offset = (0, 0)
         shadow_blur = 0
@@ -385,6 +420,9 @@ def render_title_plan(
         font, tracking, _, line_height = fitted_line
         line_center = (centers[index][0], round(centers[index][1] - line_height / 2))
         text_palette = palette
+        if line.get("fill_color"):
+            text_palette = [_rgba_from_hex(line["fill_color"])]
+        line_outline = _rgba_from_hex(line["outline_color"]) if line.get("outline_color") else outline
         if plan["layout_family"] == "playful_children" and plan["render_mode"] != "vector_flat":
             text_palette = [
                 (244, 85, 70, 255),
@@ -400,9 +438,10 @@ def render_title_plan(
                 line["text"],
                 font,
                 text_palette,
-                outline,
-                outline_width,
+                line_outline,
+                effective_outline_width,
                 max_width,
+                line.get("arc_degrees"),
             )
         elif plan["render_mode"] == "vector_flat" or plan["layout_family"] == "playful_children":
             _draw_tracked(
@@ -412,8 +451,8 @@ def render_title_plan(
                 font,
                 tracking,
                 text_palette[0],
-                stroke_width=outline_width,
-                stroke_fill=outline,
+                stroke_width=effective_outline_width,
+                stroke_fill=line_outline,
                 palette=text_palette if plan["layout_family"] == "playful_children" else None,
             )
         else:
@@ -425,8 +464,8 @@ def render_title_plan(
                 font,
                 tracking,
                 text_palette,
-                outline,
-                outline_width,
+                line_outline,
+                effective_outline_width,
                 shadow_fill,
                 shadow_offset,
                 shadow_blur,

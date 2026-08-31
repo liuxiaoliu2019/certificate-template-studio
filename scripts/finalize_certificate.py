@@ -102,13 +102,14 @@ def parse_args() -> argparse.Namespace:
         "--title-mode", required=True, choices=["vector_flat", "vector_effect", "ai_integrated"]
     )
     parser.add_argument("--title-plan", type=Path)
+    parser.add_argument("--template-dna", type=Path, help="模板模式的非文字标题结构锁")
     parser.add_argument("--layout-family", choices=LAYOUT_FAMILIES)
     parser.add_argument("--style-family")
     parser.add_argument("--font", type=Path)
     parser.add_argument("--font-style-hint", default="display_sans", help=argparse.SUPPRESS)
     parser.add_argument("--fill-color", action="append", default=[])
     parser.add_argument("--outline-color")
-    parser.add_argument("--outline-width", type=int, default=0)
+    parser.add_argument("--outline-width", type=int)
     parser.add_argument("--shadow-color")
     parser.add_argument("--shadow-offset", default="0,0")
     parser.add_argument("--shadow-blur", type=int, default=0)
@@ -123,6 +124,7 @@ def load_or_build_plan(
     title: str,
     output: Path,
     report: Path,
+    template_dna: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], Path]:
     if args.title_plan:
         path = args.title_plan.expanduser().resolve()
@@ -137,6 +139,7 @@ def load_or_build_plan(
             style_family=args.style_family,
             layout_family=args.layout_family,
             render_mode=args.title_mode,
+            template_dna=template_dna,
         )
         path = report.with_name(f"{output.stem}.title-layout.json")
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -162,11 +165,23 @@ def main() -> int:
     if output.suffix.lower() != ".png":
         raise ValueError("正式成品必须使用 .png 扩展名")
     title = normalize_title(args.title)
+    template_dna: dict[str, Any] | None = None
+    if args.template_dna:
+        dna_path = args.template_dna.expanduser().resolve()
+        if not dna_path.is_file():
+            raise FileNotFoundError(f"找不到 Template DNA：{dna_path}")
+        template_dna = json.loads(dna_path.read_text(encoding="utf-8"))
+        validate_document(template_dna, "template_dna.schema.json")
+        title_system = template_dna.get("title_system")
+        if title_system:
+            # Template mode uses the source title material as the authority.  An
+            # old generic --title-mode must not turn a flat native title into gold.
+            args.title_mode = title_system["visual_treatment"]["render_mode"]
     if args.title_mode in {"vector_flat", "vector_effect"} and not args.base_text_free:
         raise ValueError("程序标题模式必须先确认底图无文字，并传入 --base-text-free")
     if args.title_mode == "ai_integrated" and not args.ai_title_validated:
         raise ValueError("生成式标题必须先通过文字与视觉验收，并传入 --ai-title-validated")
-    if args.outline_width < 0 or args.shadow_blur < 0:
+    if (args.outline_width is not None and args.outline_width < 0) or args.shadow_blur < 0:
         raise ValueError("描边宽度和阴影模糊不能为负数")
     try:
         offset_items = tuple(int(item.strip()) for item in args.shadow_offset.split(","))
@@ -191,7 +206,9 @@ def main() -> int:
     title_plan_sha256: str | None = None
     font_evidence: list[dict[str, Any]] = []
     if args.title_mode != "ai_integrated":
-        title_plan, title_plan_path = load_or_build_plan(args, title, output, report)
+        title_plan, title_plan_path = load_or_build_plan(
+            args, title, output, report, template_dna=template_dna
+        )
         title_plan_sha256 = sha256_file(title_plan_path)
         default_colors = (
             ["#1F4E79"]
